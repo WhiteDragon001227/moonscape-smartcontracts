@@ -33,12 +33,9 @@ let init = async function(networkId) {
     let tradeEnabled = true;
     let priceReceiver = owner;
 
-
-
     // contract calls
     await enableTrade();
     await setPriceReceiver();
-    // NOTE add factory calls
 
     //--------------------------------------------------
     // Functions operating the contract

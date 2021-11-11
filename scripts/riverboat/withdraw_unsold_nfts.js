@@ -1,6 +1,5 @@
 let Riverboat = artifacts.require("Riverboat");
 let RiverboatNft = artifacts.require("RiverboatNft");
-let RiverboaFactory = artifacts.require("RiverboaFactory");
 
 
 // global variables
@@ -24,7 +23,6 @@ let init = async function(networkId) {
 
     let riverboat = await Riverboat.at("0x8E61f5028eEA48fdd58FD3809fc2202ABdBDC126");
     let riverboatNft     = await RiverboatNft.at("0x7115ABcCa5f0702E177f172C1c14b3F686d6A63a");
-    let riverboaFactory = await RiverboaFactory.at("0x8BDc19BAb95253B5B30D16B9a28E70bAf9e0101A");
 
 
     let owner = accounts[0];
@@ -34,16 +32,11 @@ let init = async function(networkId) {
     // Parameters setup and function calls
     //--------------------------------------------------
 
-    let riverboatNftAddress = riverboatNft.address;
-    let nftMetadataAddress = riverboaFactory.address;
-
-    let tradeEnabled = true;
-    let priceReceiver = owner;
-
-
+    let sessionId = parseInt(await riverboat.lastSessionId.call());
+    sessionId = console.log(`last session id: ${sessionId}`);
+    let receiverAddress = owner;
 
     // contract calls
-    await setPriceReceiver();
     await approveUnsoldNfts();
     await withdrawNfts();
 
@@ -51,27 +44,29 @@ let init = async function(networkId) {
     // Functions operating the contract
     //--------------------------------------------------
 
-    // add currency address -only needs to run once per currency
-    async function setPriceReceiver(){
-        console.log("attempting to set price receiver...");
-        await riverboat.setPriceReceiver(priceReceiver, {from: owner})
-          .catch(console.error);
-        console.log(`${currencyAddress} was set as price receiver`);
-    }
-
-    // enable trade (true/false) -only needs to run once
-    async function enableTrade(){
-      console.log("attempting to enable trade...");
-      await riverboat.enableTrade(tradeEnabled, {from: owner});
-      console.log(`tradeEnabled was set to ${tradeEnabled}`);
-    }
-
     // approve withdrawal of unsold nfts - after session end
     async function approveUnsoldNfts(){
       console.log("attempting to approve unsold nfts...");
-      await riverboat.approveUnsoldNfts(sessionId, {from: owner});
-      console.log(`tradeEnabled was set to ${tradeEnabled}`);
+      await riverboat.approveUnsoldNfts(sessionId, receiverAddress, {from: owner});
+
+      console.log("Checking if Nfts are approved ?")
+      let approved = await riverboatNft.isApprovedForAll(receiverAddress, riverboat.address);
+      console.log(approved);
     }
+
+    async function withdrawNfts(){
+      let tokenId;
+      while(true){
+      let tokenId = await riverboatNft.tokenOfOwnerByIndex(owner, 0).catch(console.error);
+      tokenId = parseInt(tokenId.toString());
+      if(tokenId == NaN)
+        break;
+      console.log("attempting to withdraw unsold nfts...");
+      await nft.safeTransferFrom(riverboat.address, 0);
+      console.log(`${tokenId} was transfered`);
+      }
+    }
+
 
 
 }.bind(this);

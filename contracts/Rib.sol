@@ -5,7 +5,7 @@ pragma solidity 0.6.7;
 import "./openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /// @author Medet Ahmetson
-contract RiverBoat is ERC20 {
+contract Rib is ERC20 {
     /**
      * @dev Sets the {name} and {symbol} of token.
      * Initializes {decimals} with a default value of 18.

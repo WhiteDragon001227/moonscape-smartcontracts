@@ -1,7 +1,4 @@
 let Riverboat = artifacts.require("Riverboat");
-let RiverboatNft = artifacts.require("RiverboatNft");
-let RiverboaFactory = artifacts.require("RiverboaFactory");
-
 
 // global variables
 let accounts;
@@ -23,8 +20,7 @@ let init = async function(networkId) {
     console.log(accounts);
 
     let riverboat = await Riverboat.at("0x8E61f5028eEA48fdd58FD3809fc2202ABdBDC126");
-    let riverboatNft     = await RiverboatNft.at("0x7115ABcCa5f0702E177f172C1c14b3F686d6A63a");
-    let riverboaFactory = await RiverboaFactory.at("0x8BDc19BAb95253B5B30D16B9a28E70bAf9e0101A");
+
 
 
     let owner = accounts[0];
@@ -33,9 +29,6 @@ let init = async function(networkId) {
     //--------------------------------------------------
     // Parameters setup and function calls
     //--------------------------------------------------
-
-    let riverboatNftAddress = riverboatNft.address;
-    let nftMetadataAddress = riverboaFactory.address;
 
     let tradeEnabled = true;
     let priceReceiver = owner;

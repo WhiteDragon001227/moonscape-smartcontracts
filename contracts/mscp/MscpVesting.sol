@@ -14,28 +14,27 @@ contract MscpVesting is Ownable {
     /// @dev session data
     IERC20 private immutable token;
   	uint256 public startTime;
-
     /// @dev total tokens to be released gradualy (excluding "day one" tokens)
     uint256 constant private TOTAL_PRIVATE = 8500000 * 10**18;
     uint256 constant private TOTAL_STRATEGIC = 8000000 * 10**18;
     /// @dev vesting duration in seconds
-    uint256 constant private DURATION_PRIVATE =  9;  //25920000;     /// 300 days
-    uint256 constant private DURATION_STRATEGIC = 7; //12960000;   /// 150 days
+    uint256 constant private DURATION_PRIVATE =  25920000;     /// 300 days
+    uint256 constant private DURATION_STRATEGIC = 12960000;   /// 150 days
 
     struct Balance {
         uint256 remainingCoins;
-    	  bool strategicInvestor;
-        bool claimedBonus;      // true if "day one" tokens were claimed
+    	  bool strategicInvestor;   // true if investor type is strategic
+        bool claimedBonus;        // true if "day one" tokens were claimed
     }
 
-    mapping(address=>Balance) balances;
+    mapping(address=>Balance) public balances;
 
     event InvestorModified(address indexed investor, uint256 remainingCoins);
     event Withdraw(address indexed receiver, uint256 withdrawnAmount, uint256 remainingCoins);
 
     constructor (IERC20 _token, uint256 _startTime) public {
         require(address(_token) != address(0), "invalid currency address");
-        require(_startTime > now, "start time should be in future");
+        require(_startTime > now, "vesting should start in future");
 
         token = _token;
         startTime = _startTime;
@@ -47,20 +46,16 @@ contract MscpVesting is Ownable {
 
     /// @notice add strategic investor address
     /// @param _investor address to be added
-    function addStrategicInvestor (address _investor) external onlyOwner {
+    /// @param _strategicInvestor true if strategic investor
+    function addInvestor (address _investor, bool _strategicInvestor) external onlyOwner {
         require(balances[_investor].remainingCoins == 0, "investor already has allocation");
 
-        balances[_investor].remainingCoins = TOTAL_STRATEGIC;
-        balances[_investor].strategicInvestor = true;
-
-        emit InvestorModified(_investor, balances[_investor].remainingCoins);
-    }
-
-    /// @notice add private investor address
-    /// @param _investor address to be added
-    function addPrivateInvestor (address _investor) external onlyOwner {
-        require(balances[_investor].remainingCoins == 0, "investor already has allocation");
-        balances[_investor].remainingCoins = TOTAL_PRIVATE;
+        if(_strategicInvestor){
+            balances[_investor].remainingCoins = TOTAL_STRATEGIC;
+            balances[_investor].strategicInvestor = true;
+        } else
+            balances[_investor].remainingCoins = TOTAL_PRIVATE;
+            
         emit InvestorModified(_investor, balances[_investor].remainingCoins);
     }
 
@@ -74,10 +69,10 @@ contract MscpVesting is Ownable {
 
     /// @notice clam the unlocked tokens
     function withdraw () external {
-        require(now >= startTime, "vesting hasnt started yet");
-        require(getAllocation(msg.sender) > 0, "user has no allocation");
-
         Balance storage balance = balances[msg.sender];
+        require(now >= startTime, "vesting hasnt started yet");
+        require(balance.remainingCoins > 0, "user has no allocation");
+
         uint256 timePassed = getDuration(balance.strategicInvestor);
         uint256 availableAmount = getAvailableTokens(balance
             .strategicInvestor, timePassed, balance.remainingCoins);
@@ -87,8 +82,6 @@ contract MscpVesting is Ownable {
             balance.claimedBonus = true;
             availableAmount += getBonus(balance.strategicInvestor);
         }
-        require(token.balanceOf(address(this)) >= availableAmount,
-            "insufficient contract balance");
 
         token.safeTransfer(msg.sender, availableAmount);
 
@@ -98,14 +91,6 @@ contract MscpVesting is Ownable {
     //--------------------------------------------------------------------
     //  internal functions
     //--------------------------------------------------------------------
-
-    /// @notice get amount of tokens user has yet to withdraw
-    /// @param _investor address to check
-    /// @return amount of remaining coins
-    // NOTE remove this function, only for testing
-    function getAllocation(address _investor) public view returns(uint) {
-        return balances[_investor].remainingCoins;
-    }
 
     /// @dev calculate how much time has passed since start.
     /// If vesting is finished, return length of the session

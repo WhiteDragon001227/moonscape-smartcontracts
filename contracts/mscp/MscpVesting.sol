@@ -11,18 +11,16 @@ contract MscpVesting is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    /// "session" data
+    /// @dev session data
     IERC20 private immutable token;
   	uint256 public startTime;
 
-    // constant variables
-    uint256 constant private MULTIPLIER = 10**18;
-    /// @dev total tokens to be released gradualy (without "day one" tokens)
-    uint256 constant private TOTAL_PRIVATE = 8500000 * MULTIPLIER;
-    uint256 constant private TOTAL_STRATEGIC = 8000000 * MULTIPLIER;
+    /// @dev total tokens to be released gradualy (excluding "day one" tokens)
+    uint256 constant private TOTAL_PRIVATE = 8500000 * 10**18;
+    uint256 constant private TOTAL_STRATEGIC = 8000000 * 10**18;
     /// @dev vesting duration in seconds
     uint256 constant private DURATION_PRIVATE =  9;  //25920000;     /// 300 days
-    uint256 constant private DURATION_STRATEGIC = 6; //12960000;   /// 150 days
+    uint256 constant private DURATION_STRATEGIC = 7; //12960000;   /// 150 days
 
     struct Balance {
         uint256 remainingCoins;
@@ -153,7 +151,7 @@ contract MscpVesting is Ownable {
     /// @return bonus amount
     function getBonus(bool _strategicInvestor) internal view returns(uint) {
         if(_strategicInvestor)
-            return 2000000 * MULTIPLIER; // 2 mil is released on day one
-        return 1500000 * MULTIPLIER; // 1.5 mil is released on day one
+            return 2000000 * 10**18; // 2 mil is released on day one
+        return 1500000 * 10**18; // 1.5 mil is released on day one
     }
 }

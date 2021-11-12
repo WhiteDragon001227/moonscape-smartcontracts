@@ -1,4 +1,4 @@
-The Moonscape Network smartcontracts
+# The Moonscape Network smartcontracts
 This page contains the source code of Moonscape smartcontracts developed by seascape.
 
 For more in-depth explanation, please visit https://docs.seascape.network/

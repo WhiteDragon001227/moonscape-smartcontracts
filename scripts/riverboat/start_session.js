@@ -21,9 +21,9 @@ let init = async function(networkId) {
     accounts = await web3.eth.getAccounts();
     console.log(accounts);
 
-    let riverboat = await Riverboat.at("0x8E61f5028eEA48fdd58FD3809fc2202ABdBDC126");
-    let riverboatNft     = await RiverboatNft.at("0x7115ABcCa5f0702E177f172C1c14b3F686d6A63a");
-    let rib = await Rib.at("");
+    let riverboat = await Riverboat.at("0x5434BDc9de2005278532F9041cBf3C939E48C4DC");
+    let riverboatNft     = await RiverboatNft.at("0x115Aa9E35564307365Ca3f215f67eB69886f2fD1");
+    let rib = await Rib.at("0x55512B86d04E40d7CcE82736c8051e292c4ED31B");
 
 
     let owner = accounts[0];
@@ -35,12 +35,12 @@ let init = async function(networkId) {
 
     let currencyAddress = rib.address;
     let nftAddress = riverboatNft.address;
-    let lighthouseTierAddress = "0x0";
+    let lighthouseTierAddress = '0x0000000000000000000000000000000000000000';
     let startPrice = web3.utils.toWei("1", "ether");
     let priceIncrease = web3.utils.toWei("1", "ether");
     let startTime = Math.floor(Date.now()/1000) + 60;
-    let intervalDuration = 60;
-    let intervalsAmount = 10;
+    let intervalDuration = 210;
+    let intervalsAmount = 3;
     let slotsAmount = 3;
 
 
@@ -56,11 +56,11 @@ let init = async function(networkId) {
     async function startSession(){
         console.log("attempting to start session...");
         await riverboat.startSession(currencyAddress, nftAddress, lighthouseTierAddress, startPrice,
-          priceIncrease, startTime, intervalDuration, intervalsAmount, slotsAmount {from: owner})
+          priceIncrease, startTime, intervalDuration, intervalsAmount, slotsAmount, {from: owner})
           .catch(console.error);
 
-        let sessionId = parseInt(await riverboat.lastSessionId.call());
-        console.log(`started session with id${sessionId}`);
+        let sessionId = parseInt(await riverboat.sessionId.call());
+        console.log(`started session with id ${sessionId}`);
     }
 
 }.bind(this);

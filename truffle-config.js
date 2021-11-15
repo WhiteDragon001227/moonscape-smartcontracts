@@ -1,4 +1,4 @@
-var HDWalletProvider = require("truffle-hdwallet-provider");
+var HDWalletProvider = require('@truffle/hdwallet-provider');
 require('dotenv').config();
 
 module.exports = {
@@ -37,8 +37,8 @@ module.exports = {
     skipDryRun: true
   },
   // Moonbase Alpha TestNet
-  moonbase: {
-    provider: () => new HDWalletProvider(process.env.MNEMONIC, `https://rpc.testnet.moonbeam.network`),
+  moonbase: {                 // alternative RPC: rpc.testnet.moonbeam.network
+    provider: () => new HDWalletProvider(process.env.MNEMONIC, `https://moonbeam-alpha.api.onfinality.io/public`),
     network_id: 1287,
     gas: 5190000
 },

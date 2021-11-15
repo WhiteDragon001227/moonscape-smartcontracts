@@ -39,8 +39,8 @@ let init = async function(networkId) {
     let startPrice = web3.utils.toWei("1", "ether");
     let priceIncrease = web3.utils.toWei("1", "ether");
     let startTime = Math.floor(Date.now()/1000) + 60;
-    let intervalDuration = 210;
-    let intervalsAmount = 3;
+    let intervalDuration = 10800;
+    let intervalsAmount = 8;
     let slotsAmount = 3;
 
 

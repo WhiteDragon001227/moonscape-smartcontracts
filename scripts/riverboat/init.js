@@ -21,8 +21,6 @@ let init = async function(networkId) {
 
     let riverboat = await Riverboat.at("0x8E61f5028eEA48fdd58FD3809fc2202ABdBDC126");
 
-
-
     let owner = accounts[0];
     console.log(`Using account ${owner}`);
 

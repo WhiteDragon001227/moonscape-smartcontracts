@@ -16,7 +16,7 @@ contract MscpPrivateVesting is Ownable {
   	uint256 public startTime;
     /// @dev total tokens to be released gradualy (excluding "day one" tokens)
     uint256 constant private SUPPLY = 4250000 * 10**18;
-    uint256 constant private DURATION =  7;     /// 300 days
+    uint256 constant private DURATION =  25920000;     /// 300 days
 
     /// @dev investorAddress => remainingCoins
     mapping(address=>uint) public remainingCoins;
@@ -78,13 +78,5 @@ contract MscpPrivateVesting is Ownable {
         token.safeTransfer(msg.sender, availableAmount);
 
         emit Withdraw(msg.sender, availableAmount, remainingCoins[msg.sender]);
-    }
-
-    /// @notice get amount of tokens user has yet to withdraw
-    /// @param _investor address to check
-    /// @return amount of remaining coins
-    // NOTE remove this function, only for testing
-    function getAllocation(address _investor) public view returns(uint) {
-        return remainingCoins[_investor];
     }
 }

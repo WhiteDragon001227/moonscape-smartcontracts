@@ -39,11 +39,6 @@ contract RiverboatFactory is AccessControl {
         grantRole(DEFAULT_ADMIN_ROLE, account);
     }
 
-     /// @dev Remove oneself from the admin role.
-     function renounceAdmin() public virtual {
-        renounceRole(DEFAULT_ADMIN_ROLE, msg.sender);
-     }
-
      /// @dev Return `true` if the account belongs to the admin role.
      function isAdmin(address account) public virtual view returns (bool) {
         return hasRole(DEFAULT_ADMIN_ROLE, account);

@@ -93,7 +93,7 @@ contract MscpToken is Context, IERC20, Ownable {
      *
      * Included just to follow the standard of OpenZeppelin.
      */
-    function burn(uint256 amount) public onlyBridge {
+    function burn(uint256 amount) public {
         require(false, "Only burnFrom is allowed");
     }
 

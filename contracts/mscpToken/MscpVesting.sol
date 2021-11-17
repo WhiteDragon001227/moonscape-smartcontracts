@@ -49,7 +49,6 @@ contract MscpVesting is Ownable {
     /// @param _strategicInvestor true if strategic investor
     function addInvestor (address _investor, bool _strategicInvestor) external onlyOwner {
         require(balances[_investor].remainingCoins == 0, "investor already has allocation");
-        require(balances[_investor].claimedBonus)
 
         if(_strategicInvestor){
             balances[_investor].remainingCoins = SUPPLY_STRATEGIC;

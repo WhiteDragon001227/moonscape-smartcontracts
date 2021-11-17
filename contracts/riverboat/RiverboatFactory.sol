@@ -22,6 +22,8 @@ contract RiverboatFactory is AccessControl {
     //--------------------------------------------------
 
     function mintType(address _owner, uint256 _type) public returns(uint256) {
+        /// TODO add access control modifier - onlyAdmin or onlyStaticUser
+        require(address(_owner) != address(0), "invalid owner address");
         require (_type < 5, "invalid type");
         return nft.mint(_owner, _type);
     }
@@ -29,6 +31,12 @@ contract RiverboatFactory is AccessControl {
     //--------------------------------------------------
     // Only owner
     //--------------------------------------------------
+
+    /// @dev Restricted to members of the admin role.
+    modifier onlyAdmin() {
+       require(isAdmin(msg.sender), "Restricted to admins.");
+       _;
+    }
 
     function setNft(address _nft) public onlyAdmin {
         nft = RiverboatNft(_nft);
@@ -42,12 +50,6 @@ contract RiverboatFactory is AccessControl {
      /// @dev Return `true` if the account belongs to the admin role.
      function isAdmin(address account) public virtual view returns (bool) {
         return hasRole(DEFAULT_ADMIN_ROLE, account);
-     }
-
-     /// @dev Restricted to members of the admin role.
-     modifier onlyAdmin() {
-        require(isAdmin(msg.sender), "Restricted to admins.");
-        _;
      }
 
 
@@ -64,6 +66,7 @@ contract RiverboatFactory is AccessControl {
 
      /// @dev Add an account to the user role. Restricted to admins.
      function addStaticUser(address account) public virtual onlyAdmin {
+        require(account != address(0), "invalid account address");
         grantRole(STATIC_ROLE, account);
      }
 
@@ -86,6 +89,7 @@ contract RiverboatFactory is AccessControl {
 
      /// @dev Add an account to the user role. Restricted to admins.
      function addGenerator(address account) public virtual onlyAdmin {
+        require(account != address(0), "invalid account address");
         grantRole(GENERATOR_ROLE, account);
      }
 

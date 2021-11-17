@@ -48,10 +48,12 @@ contract RiverboatNft is ERC721, ERC721Burnable, Ownable {
     }
 
     function setOwner(address _owner) public onlyOwner {
+        require(_owner != address(0), "invalid owner address");
         transferOwnership(_owner);
     }
 
     function setFactory(address _factory) public onlyOwner {
+        require(_factory != address(0), "invalid factory address");
         factory = _factory;
     }
 

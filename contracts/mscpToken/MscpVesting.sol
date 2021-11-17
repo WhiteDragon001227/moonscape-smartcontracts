@@ -15,10 +15,10 @@ contract MscpVesting is Ownable {
     IERC20 private immutable token;
   	uint256 public startTime;
     /// @dev total tokens to be released gradualy (excluding "day one" tokens)
-    uint256 constant private TOTAL_PRIVATE = 8500000 * 10**18;
-    uint256 constant private TOTAL_STRATEGIC = 8000000 * 10**18;
+    uint256 constant private SUPPLY_PRIVATE = 8500000 * 10**18;
+    uint256 constant private SUPPLY_STRATEGIC = 8000000 * 10**18;
     /// @dev vesting duration in seconds
-    uint256 constant private DURATION_PRIVATE =  25920000;     /// 300 days
+    uint256 constant private DURATION_PRIVATE =  25920000;    /// 300 days
     uint256 constant private DURATION_STRATEGIC = 12960000;   /// 150 days
 
     struct Balance {
@@ -49,13 +49,14 @@ contract MscpVesting is Ownable {
     /// @param _strategicInvestor true if strategic investor
     function addInvestor (address _investor, bool _strategicInvestor) external onlyOwner {
         require(balances[_investor].remainingCoins == 0, "investor already has allocation");
+        require(balances[_investor].claimedBonus)
 
         if(_strategicInvestor){
-            balances[_investor].remainingCoins = TOTAL_STRATEGIC;
+            balances[_investor].remainingCoins = SUPPLY_STRATEGIC;
             balances[_investor].strategicInvestor = true;
         } else
-            balances[_investor].remainingCoins = TOTAL_PRIVATE;
-            
+            balances[_investor].remainingCoins = SUPPLY_PRIVATE;
+
         emit InvestorModified(_investor, balances[_investor].remainingCoins);
     }
 
@@ -123,11 +124,11 @@ contract MscpVesting is Ownable {
         returns(uint)
     {
         if(_strategicInvestor){
-            uint256 unclaimedPotential = (_timePassed * TOTAL_STRATEGIC / DURATION_STRATEGIC);
-            return unclaimedPotential - (TOTAL_STRATEGIC - _remainingCoins);
+            uint256 unclaimedPotential = (_timePassed * SUPPLY_STRATEGIC / DURATION_STRATEGIC);
+            return unclaimedPotential - (SUPPLY_STRATEGIC - _remainingCoins);
         } else {
-            uint256 unclaimedPotential = (_timePassed * TOTAL_PRIVATE / DURATION_PRIVATE);
-            return unclaimedPotential - (TOTAL_PRIVATE - _remainingCoins);
+            uint256 unclaimedPotential = (_timePassed * SUPPLY_PRIVATE / DURATION_PRIVATE);
+            return unclaimedPotential - (SUPPLY_PRIVATE - _remainingCoins);
         }
     }
 

@@ -118,7 +118,7 @@ contract Riverboat is IERC721Receiver, Ownable {
         require(_nftAddress != address(0), "invalid nft address");
         require(_startPrice > 0, "start price can't be 0");
         require(_priceIncrease > 0, "price increase can't be 0");
-        require(_startTime > block.timestamp, "session should start in future");
+        require(_startTime > now, "session should start in future");
         require(_intervalDuration > 0, "interval duration can't be 0");
         require(_intervalsAmount > 0, "intervals amount can't be 0");
         require(_slotsAmount > 0, "slots amount can't be 0");

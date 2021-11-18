@@ -1,4 +1,4 @@
-pragma solidity ^0.6.7;
+pragma solidity 0.6.7;
 
 import "./../openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./../openzeppelin/contracts/token/ERC20/SafeERC20.sol";
@@ -6,8 +6,6 @@ import "./../openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./../openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./../openzeppelin/contracts/access/Ownable.sol";
 import "./LighthouseTierInterface.sol";
-import "./RiverboatNft.sol";
-
 
 
 /// @title RiverboatNft is a nft service platform
@@ -84,7 +82,7 @@ contract Riverboat is IERC721Receiver, Ownable {
     /// @notice change price receiver address
     /// @param _priceReceiver address of new receiver
     function setPriceReceiver(address _priceReceiver) external onlyOwner {
-        require(_priceReceiver != address(0), "Invalid address");
+        require(_priceReceiver != address(0), "Invalid price receiver address");
         priceReceiver = _priceReceiver;
     }
 
@@ -151,10 +149,11 @@ contract Riverboat is IERC721Receiver, Ownable {
     /// @dev after session is finished owner can approve withdrawal of remaining nfts
     /// @param _sessionId session unique identifier
     /// @param _receiverAddress address which will receive the nfts
-    function approveUnsoldNfts(uint _sessionId, address _receiverAddress)
+    function approveUnsoldNfts(uint256 _sessionId, address _receiverAddress)
         external
         onlyOwner
     {
+        require(_receiverAddress != address(0), "invalid receiver address");
         require(isFinished(_sessionId), "seesion needs to be finished");
         IERC721(sessions[_sessionId].nftAddress).setApprovalForAll(_receiverAddress, true);
 

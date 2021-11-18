@@ -35,6 +35,7 @@ contract RiverboatNft is ERC721, ERC721Burnable, Ownable {
     }
 
     function mint(address _to, uint256 _type) public onlyFactory returns(uint256) {
+        require(_to != address(0), "invalid receiver address");
         uint256 _tokenId = tokenId.current();
         require(_tokenId <= 1000, "Exceeded max supply cap of 1000");
 
@@ -48,7 +49,6 @@ contract RiverboatNft is ERC721, ERC721Burnable, Ownable {
     }
 
     function setOwner(address _owner) public onlyOwner {
-        require(_owner != address(0), "invalid owner address");
         transferOwnership(_owner);
     }
 

@@ -13,6 +13,7 @@ contract RiverboatFactory is AccessControl {
     RiverboatNft private nft;
 
     constructor(address _nft) public {
+        require(_nft != address(0), "Invalid nft address");
         nft = RiverboatNft(_nft);
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
@@ -21,9 +22,7 @@ contract RiverboatFactory is AccessControl {
     // Only Riverboat Minting contract
     //--------------------------------------------------
 
-    function mintType(address _owner, uint256 _type) public returns(uint256) {
-        /// TODO add access control modifier - onlyAdmin or onlyStaticUser
-        require(address(_owner) != address(0), "invalid owner address");
+    function mintType(address _owner, uint256 _type) public onlyGenerator returns(uint256) {
         require (_type < 5, "invalid type");
         return nft.mint(_owner, _type);
     }
@@ -39,6 +38,7 @@ contract RiverboatFactory is AccessControl {
     }
 
     function setNft(address _nft) public onlyAdmin {
+        require(_nft != address(0), "invalid owner address");
         nft = RiverboatNft(_nft);
     }
 

@@ -46,10 +46,10 @@ module.exports = async function(deployer, network) {
 
     } else if (network == "moonbase") {
       let startTime = Math.floor(Date.now()/1000) + 100;
-      let mscpToken = "";
-      await deployer.deploy(MscpToken).then(function(){
-          console.log("Mscp token contract was deployed at address: "+MscpToken.address);
-      });
+      let mscpToken = "0xF2C84Cb3d1e9Fac001F36c965260aA2a9c9D822D";
+      // await deployer.deploy(MscpToken).then(function(){
+      //     console.log("Mscp token contract was deployed at address: "+MscpToken.address);
+      // });
       await deployer.deploy(MscpVesting, MscpToken.address, startTime).then(function(){
           console.log("Mscp vesting contract was deployed at address: "+MscpVesting.address);
       });

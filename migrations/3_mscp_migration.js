@@ -1,6 +1,7 @@
 var MscpToken = artifacts.require("./MscpToken.sol");
 var MscpVesting = artifacts.require("./MscpVesting.sol");
-var MscpPrivateVesting = artifacts.require("./MscpPrivateVesting.sol");
+var MscpVesting5M = artifacts.require("./MscpVesting5M.sol");
+var MscpVesting30M = artifacts.require("./MscpVesting30M.sol");
 
 
 
@@ -20,8 +21,11 @@ module.exports = async function(deployer, network) {
       // await deployer.deploy(MscpVesting, MscpToken.address, startTime).then(function(){
       //     console.log("Mscp vesting contract was deployed at address: "+MscpVesting.address);
       // });
-      await deployer.deploy(MscpPrivateVesting, MscpToken.address, startTime).then(function(){
-          console.log("MscpPrivateVesting contract was deployed at address: "+MscpPrivateVesting.address);
+      await deployer.deploy(MscpVesting5M, MscpToken.address, startTime).then(function(){
+          console.log("MscpVesting5M contract was deployed at address: "+MscpVesting5M.address);
+      });
+      await deployer.deploy(MscpVesting30M, MscpToken.address, startTime).then(function(){
+          console.log("MscpVesting30M contract was deployed at address: "+MscpVesting30M.address);
       });
 
     } else if (network == "rinkeby") {

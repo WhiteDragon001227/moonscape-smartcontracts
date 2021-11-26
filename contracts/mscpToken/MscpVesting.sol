@@ -89,6 +89,29 @@ contract MscpVesting is Ownable {
     }
 
     //--------------------------------------------------------------------
+    //  public functions
+    //--------------------------------------------------------------------
+
+    /// @notice get amount of tokens user has yet to withdraw
+    /// @return amount of remaining coins
+    function getAllocation() public view returns(uint) {
+        return balances[msg.sender].remainingCoins;
+    }
+
+    /// @notice calculate remaining vesting time per user
+    /// @return remaining time in seconds
+    function getRemainingTime() public view returns(uint) {
+        if(balances[msg.sender].strategicInvestor){
+            if(now < startTime + DURATION_STRATEGIC)
+                return startTime + DURATION_STRATEGIC - now;
+        } else {
+            if(now < startTime + DURATION_PRIVATE)
+                return startTime + DURATION_PRIVATE - now;
+        }
+        return 0;
+    }
+
+    //--------------------------------------------------------------------
     //  internal functions
     //--------------------------------------------------------------------
 

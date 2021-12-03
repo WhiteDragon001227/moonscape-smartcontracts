@@ -235,6 +235,17 @@ contract Riverboat is IERC721Receiver, Ownable {
         return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
     }
 
+    /// @notice get remaining time in current interval
+    /// @param _sessionId session unique identifier
+    /// @return time in seconds
+    function getIntervalTime(uint256 _sessionId) external view returns(uint) {
+        if(!isActive(_sessionId)) {
+            return 0;
+        } else {
+            return (now - sessions[_sessionId]
+              .startTime) % sessions[_sessionId].intervalDuration;
+        }
+    }
     //--------------------------------------------------------------------
     // internal functions
     //--------------------------------------------------------------------

@@ -167,9 +167,8 @@ contract Riverboat is IERC721Receiver, Ownable {
     /// @notice buy nft at selected slot
     /// @param _sessionId session unique identifier
     /// @param _nftId id of nft
-    function buy(uint256 _sessionId, uint256 _nftId)
-        external
-    {
+    function buy(uint256 _sessionId, uint256 _nftId, uint8 _v, bytes32 _r, bytes32 _s) external {
+        Session storage _session = sessions[_sessionId];
         //require stamements
         uint256 _currentInterval = getCurrentInterval(_sessionId);
         uint256 _currentPrice = getCurrentPrice(_sessionId, _currentInterval);
@@ -187,6 +186,21 @@ contract Riverboat is IERC721Receiver, Ownable {
             require(tier.getTierLevel(msg.sender) > -1, "tier rank 0-4 is required");
         }
 
+        /// @dev digital signature part
+        bytes32 _messageNoPrefix = keccak256(abi.encodePacked(
+            _sessionId,
+            _nftId,
+            _currentInterval,
+            getChainId(),
+            _currentPrice,
+            address(this),
+            _session.currencyAddress,
+            _session.nftAddress
+        ));
+        bytes32 _message = keccak256(abi.encodePacked(
+            "\x19Ethereum Signed Message:\n32", _messageNoPrefix));
+        address _recover = ecrecover(_message, _v, _r, _s);
+        require(_recover == owner(),  "Verification failed");
         // update state
         nftMinters[_sessionId][_currentInterval][msg.sender] = true;
 

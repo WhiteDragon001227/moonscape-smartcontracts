@@ -172,7 +172,7 @@ contract Riverboat is IERC721Receiver, Ownable {
         //require stamements
         uint256 _currentInterval = getCurrentInterval(_sessionId);
         uint256 _currentPrice = getCurrentPrice(_sessionId, _currentInterval);
-        require(IERC721(sessions[_sessionId].nftAddress).ownerOf(_nftId) == address(this),
+        require(IERC721(_session.nftAddress).ownerOf(_nftId) == address(this),
             "contract not owner of this nft");
         require(!nftMinters[_sessionId][_currentInterval][msg.sender],
             "cant buy more nfts per interval");
@@ -180,8 +180,8 @@ contract Riverboat is IERC721Receiver, Ownable {
 
         /// @dev make sure msg.sender has obtained tier in LighthouseTier.sol
         /// LighthouseTier.sol is external but trusted contract maintained by Seascape
-        if(sessions[_sessionId].lighthouseTierAddress != address(0)){
-            LighthouseTierInterface tier = LighthouseTierInterface(sessions[_sessionId]
+        if(_session.lighthouseTierAddress != address(0)){
+            LighthouseTierInterface tier = LighthouseTierInterface(_session
                 .lighthouseTierAddress);
             require(tier.getTierLevel(msg.sender) > -1, "tier rank 0-4 is required");
         }
@@ -201,14 +201,13 @@ contract Riverboat is IERC721Receiver, Ownable {
             "\x19Ethereum Signed Message:\n32", _messageNoPrefix));
         address _recover = ecrecover(_message, _v, _r, _s);
         require(_recover == owner(),  "Verification failed");
+
         // update state
         nftMinters[_sessionId][_currentInterval][msg.sender] = true;
 
         /// make transactions
-        address _currencyAddress = sessions[_sessionId].currencyAddress;
-        IERC20(_currencyAddress).safeTransferFrom(msg.sender, priceReceiver, _currentPrice);
-        address _nftAddress = sessions[_sessionId].nftAddress;
-        IERC721(_nftAddress).safeTransferFrom(address(this), msg.sender, _nftId);
+        IERC20(_session.currencyAddress).safeTransferFrom(msg.sender, priceReceiver, _currentPrice);
+        IERC721(_session.nftAddress).safeTransferFrom(address(this), msg.sender, _nftId);
 
         /// emit events
         emit Buy(
@@ -246,6 +245,7 @@ contract Riverboat is IERC721Receiver, Ownable {
               .startTime) % sessions[_sessionId].intervalDuration;
         }
     }
+
     //--------------------------------------------------------------------
     // internal functions
     //--------------------------------------------------------------------

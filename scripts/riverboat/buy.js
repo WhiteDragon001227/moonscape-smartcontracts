@@ -22,12 +22,13 @@ let init = async function(networkId) {
     let multiplier = 1000000000000000000;
     console.log(accounts);
 
-    let riverboat = await Riverboat.at("0x5434BDc9de2005278532F9041cBf3C939E48C4DC");
-    let riverboatNft     = await RiverboatNft.at("0x115Aa9E35564307365Ca3f215f67eB69886f2fD1");
-    let rib = await Rib.at("0x55512B86d04E40d7CcE82736c8051e292c4ED31B");
+    let riverboat = await Riverboat.at("0xfF6d9a52A37FccFa1dd5df767B68D39451E4b974");
+    let riverboatNft = await RiverboatNft.at("0x016f2b8fDF8F7c76b97a666fA31aBF064b1541B1");
+    let rib = await Rib.at("0xE29A4BD665e4782a4c002aA30D3d25f010E8A394");
 
 
-    let player = accounts[4];
+    let player = accounts[0];
+    let owner = accounts[0];
     console.log(`Using account ${player}`);
 
     //--------------------------------------------------
@@ -36,11 +37,29 @@ let init = async function(networkId) {
 
     let sessionId = parseInt(await riverboat.sessionId.call());
     console.log(`last session id: ${sessionId}`);
-    let nftId = await riverboatNft.tokenOfOwnerByIndex(riverboat.address, 0);
-    let amountToApprove = web3.utils.toWei("30", "ether");
+    let nftId = parseInt(await riverboatNft.tokenOfOwnerByIndex(riverboat.address, 0));
+    console.log("nftId: " ,nftId);
+
+    // let sessionId = 1;
+    // let nftId = 5;
+    let currentInterval = parseInt(await riverboat.getCurrentInterval(sessionId));
+    console.log("currentInterval: " ,currentInterval);
+    let chainId = parseInt(await riverboat.getChainId());
+    console.log("chainId: " ,chainId);
+    let currentPrice = (await riverboat.getCurrentPrice(sessionId, currentInterval)).toString();
+    console.log("currentPrice: " ,currentPrice);
+    let riverboatAddress = riverboat.address;
+    let currencyAddress = rib.address;
+    let nftAddress = riverboatNft.address;
+
+    let amountToApprove = web3.utils.toWei("1", "ether");
 
 
     // contract calls
+    console.log("generating sig");
+    let sig = await generateSig(sessionId, nftId, currentInterval, chainId,
+      currentPrice, riverboatAddress, currencyAddress, nftAddress);
+    console.log("sig generated");
     await approveRib();
     await buy();
 
@@ -60,9 +79,39 @@ let init = async function(networkId) {
     // add currency address -only needs to run once per currency
     async function buy(){
         console.log(`attempting to buy nft...`);
-        await riverboat.buy(sessionId, nftId, {from: player});
+        await riverboat.buy(sessionId, nftId, sig[0], sig[1], sig[2], {from: player});
         console.log(`bought nft id${nftId}`);
     }
 
+    // --------------------------------------------------
+    // Internal functions - digital signature part
+    // --------------------------------------------------
+
+
+    async function generateSig(sessionId, nftId, currentInterval, chainId,
+      currentPrice, riverboatAddress, currencyAddress, nftAddress){
+
+      console.log("args to be passed into noPrefix: ", sessionId, nftId, currentInterval, chainId, currentPrice);
+      let uints = web3.eth.abi.encodeParameters(
+        ["uint256", "uint256", "uint256", "uint256", "uint256"],
+        [sessionId, nftId, currentInterval, chainId, currentPrice]);
+      console.log("params encoded.");
+
+      // str needs to start with "0x"
+      let str = uints + riverboatAddress.substr(2) + currencyAddress.substr(2) + nftAddress.substr(2);
+      let message = web3.utils.keccak256(str);
+      let hash = await web3.eth.sign(message, owner);
+
+      let r = hash.substr(0,66);
+      let s = "0x" + hash.substr(66,64);
+      let v = parseInt(hash.substr(130), 16);
+      if (v < 27) {
+          v += 27;
+      }
+
+
+
+      return [v, r, s];
+    }
 
 }.bind(this);

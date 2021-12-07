@@ -37,11 +37,12 @@ let init = async function(networkId) {
 
     let sessionId = parseInt(await riverboat.sessionId.call());
     console.log(`last session id: ${sessionId}`);
-    let nftId = parseInt(await riverboatNft.tokenOfOwnerByIndex(riverboat.address, 0));
-    console.log("nftId: " ,nftId);
+    // let nftId = parseInt(await riverboatNft.tokenOfOwnerByIndex(riverboat.address, 0));
+    // console.log("nftId: " ,nftId);
 
     // let sessionId = 1;
-    // let nftId = 5;
+    let nftId = 16;
+    //let currentInterval = 4
     let currentInterval = parseInt(await riverboat.getCurrentInterval(sessionId));
     console.log("currentInterval: " ,currentInterval);
     let chainId = parseInt(await riverboat.getChainId());
@@ -60,8 +61,8 @@ let init = async function(networkId) {
     let sig = await generateSig(sessionId, nftId, currentInterval, chainId,
       currentPrice, riverboatAddress, currencyAddress, nftAddress);
     console.log("sig generated");
-    await approveRib();
-    await buy();
+    //await approveRib();
+    //await buy();
 
     //--------------------------------------------------
     // Functions operating the contract
@@ -95,12 +96,13 @@ let init = async function(networkId) {
       let uints = web3.eth.abi.encodeParameters(
         ["uint256", "uint256", "uint256", "uint256", "uint256"],
         [sessionId, nftId, currentInterval, chainId, currentPrice]);
-      console.log("params encoded.");
 
       // str needs to start with "0x"
       let str = uints + riverboatAddress.substr(2) + currencyAddress.substr(2) + nftAddress.substr(2);
       let message = web3.utils.keccak256(str);
+      console.log("message: ",message);
       let hash = await web3.eth.sign(message, owner);
+      console.log("hashed: ", hash)
 
       let r = hash.substr(0,66);
       let s = "0x" + hash.substr(66,64);
@@ -109,7 +111,9 @@ let init = async function(networkId) {
           v += 27;
       }
 
-
+      console.log("v: ",v);
+      console.log("r: ",r);
+      console.log("s: ",s);
 
       return [v, r, s];
     }

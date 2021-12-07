@@ -15,37 +15,37 @@ let init = async function(networkId) {
     console.log(accounts);
 
     // contracts
-    let factory  = await Factory.at("0xF29af81595f575d88447C69B6a760862e6EB30eC");
-    let nft     = await Nft.at("0x016f2b8fDF8F7c76b97a666fA31aBF064b1541B1");
+    let factory  = await Factory.at("0x2B57fc3a6bD98Aba718FCCe5554170B1315Ad691");
+    let nft     = await Nft.at("0x0FA0A690D71430f1A2DA08E82Ba50f18DCAd452a");
 
     // global vars
-    let receiver = "0xfF6d9a52A37FccFa1dd5df767B68D39451E4b974";
-    //let type = 0;
-    let amountToMint = 24;
+    let receiver = "0xbf7843E2CeD5dedB99da23185aaB25962E9e8645";
+    let type = 4;
+    let amountToMint = 10;
 
-
-    // let tokenId = await nft.tokenOfOwnerByIndex(receiver, 11).catch(console.error);
-    // tokenId = parseInt(tokenId);
-    // console.log(`Nft ${tokenId}`);
+    // fetch nft balance
+    console.log("Checking receiver nft balance...");
+    let balance = parseInt(await nft.balanceOf(receiver));
+    console.log(`${receiver} owns ${balance} nfts`);
 
     // mint nfts
     console.log(`attemping to mint ${amountToMint} nfts...`);
-    for(let i=0; i<=amountToMint; i++){
-        let type = i % 5;
+    for(let i=0; i<amountToMint; i++){
+        //let type = i % 5;
         let minted = await factory.mintType(receiver, type);
 
         // tokenId - get the last item in users wallet
         let tokenId = await nft.tokenOfOwnerByIndex(receiver, balance+i).catch(console.error);
         tokenId = parseInt(tokenId);
         console.log(`Nft ${i+1} with Id: ${tokenId}, type ${type} was minted`);
-        // show progress
-        if(i % 5 == 0){
-          let percentComplete = Math.round(i/amountToMint*10000) / 100;
-          console.log(`Minting ${percentComplete}% complete.`);
-        }
+        // show progress - FIX IT
+        // if(i > 0 && i % 4 == 0){
+        //   let percentComplete = Math.round(i+2/amountToMint)*1000 / 100;
+        //   console.log(`Minting ${percentComplete}% complete.`);
+        // }
     }
 
-    // // fetch nft balance
+    // fetch nft balance
     console.log("Checking receiver nft balance...");
     balance = await nft.balanceOf(receiver);
     console.log(`${receiver} owns ${balance} nfts`);

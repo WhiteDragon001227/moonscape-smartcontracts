@@ -19,7 +19,7 @@ let init = async function(networkId) {
     accounts = await web3.eth.getAccounts();
     console.log(accounts);
 
-    let riverboat = await Riverboat.at("0x8E61f5028eEA48fdd58FD3809fc2202ABdBDC126");
+    let riverboat = await Riverboat.at("0xbf7843E2CeD5dedB99da23185aaB25962E9e8645");
 
     let owner = accounts[0];
     console.log(`Using account ${owner}`);
@@ -30,10 +30,12 @@ let init = async function(networkId) {
 
     let tradeEnabled = true;
     let priceReceiver = owner;
+    let verifier = owner;
 
     // contract calls
-    await enableTrade();
-    await setPriceReceiver();
+    // await enableTrade();
+    // await setPriceReceiver();
+    await setVerifier();
 
     //--------------------------------------------------
     // Functions operating the contract
@@ -52,6 +54,12 @@ let init = async function(networkId) {
       console.log("attempting to enable trade...");
       await riverboat.enableTrade(tradeEnabled, {from: owner});
       console.log(`tradeEnabled was set to ${tradeEnabled}`);
+    }
+
+    async function setVerifier(){
+      console.log("attempting to set verifier...");
+      await riverboat.setVerifier(verifier, {from: owner});
+      console.log(`verifier was set to ${verifier}`);
     }
 
 

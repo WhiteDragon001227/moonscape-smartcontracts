@@ -18,6 +18,7 @@ contract Riverboat is IERC721Receiver, Ownable {
     bool public tradeEnabled = true;   // enable/disable buy function
     uint256 public sessionId;          // current sessionId
     address public priceReceiver;      // this address receives the money from bought tokens
+    address public verifier;           // address to verify digital signature against
 
     struct Session{
         address currencyAddress;            // currency address
@@ -64,9 +65,11 @@ contract Riverboat is IERC721Receiver, Ownable {
 
     /// @dev initialize the contract
     /// @param _priceReceiver recipient of the price during nft buy
-    constructor(address _priceReceiver) public {
+    constructor(address _priceReceiver, address _verifier) public {
         require(_priceReceiver != address(0), "Invalid price receiver address");
         priceReceiver = _priceReceiver;
+        require(_verifier != address(0), "Invalid verifier address");
+        verifier = _verifier;
     }
 
     //--------------------------------------------------------------------
@@ -84,6 +87,13 @@ contract Riverboat is IERC721Receiver, Ownable {
     function setPriceReceiver(address _priceReceiver) external onlyOwner {
         require(_priceReceiver != address(0), "Invalid price receiver address");
         priceReceiver = _priceReceiver;
+    }
+
+    /// @notice change verifier address
+    /// @param _verifier address of new verifier
+    function setVerifier(address _verifier) external onlyOwner {
+        require(_verifier != address(0), "Invalid verifier address");
+        verifier = _verifier;
     }
 
     /// @dev start a new session, during which players are allowed to buy nfts
@@ -154,7 +164,7 @@ contract Riverboat is IERC721Receiver, Ownable {
         onlyOwner
     {
         require(_receiverAddress != address(0), "invalid receiver address");
-        require(isFinished(_sessionId), "seesion needs to be finished");
+        require(isFinished(_sessionId), "sesson needs to be finished");
         IERC721(sessions[_sessionId].nftAddress).setApprovalForAll(_receiverAddress, true);
 
         emit WithdrawUnsoldNfts(_sessionId, sessions[_sessionId].nftAddress, _receiverAddress);
@@ -200,7 +210,7 @@ contract Riverboat is IERC721Receiver, Ownable {
         bytes32 _message = keccak256(abi.encodePacked(
             "\x19Ethereum Signed Message:\n32", _messageNoPrefix));
         address _recover = ecrecover(_message, _v, _r, _s);
-        require(_recover == owner(),  "Verification failed");
+        require(_recover == verifier,  "Verification failed");
 
         // update state
         nftMinters[_sessionId][_currentInterval][msg.sender] = true;
@@ -247,7 +257,7 @@ contract Riverboat is IERC721Receiver, Ownable {
     }
 
     //--------------------------------------------------------------------
-    // internal functions
+    // public functions
     //--------------------------------------------------------------------
 
     /// @dev calculate current interval number

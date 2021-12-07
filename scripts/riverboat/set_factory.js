@@ -16,9 +16,8 @@ let init = async function(networkId) {
     console.log(accounts);
 
     // contracts
-    let factory  = await Factory.at("0xF29af81595f575d88447C69B6a760862e6EB30eC");
-    let nft     = await Nft.at("0x016f2b8fDF8F7c76b97a666fA31aBF064b1541B1");
-    let riverboat = await Riverboat.at("0xfF6d9a52A37FccFa1dd5df767B68D39451E4b974");
+    let factory  = await Factory.at("0x2B57fc3a6bD98Aba718FCCe5554170B1315Ad691");
+    let nft     = await Nft.at("0x0FA0A690D71430f1A2DA08E82Ba50f18DCAd452a");
 
     // global variables
     let user = accounts[0];
@@ -33,7 +32,7 @@ let init = async function(networkId) {
     console.log("attempting to set nft...")
     await factory.setNft(nft.address, {from: user}).catch(console.error);
     console.log("nft was set");
-    console.log("attemping to set the factory...");
+    console.log("checking if user is generator?");
     let isGiven = false;
     try{
       isGiven = await factory.isGenerator(user);
@@ -42,8 +41,9 @@ let init = async function(networkId) {
     };
     console.log(isGiven);
     if (!isGiven) {
+    console.log("attemping to add generator...");
     await factory.addGenerator(user).catch(console.error);
-    console.log("factory was set");
+    console.log("user is generator");
     }
 
 }.bind(this);

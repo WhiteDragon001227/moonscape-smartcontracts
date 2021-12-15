@@ -18,31 +18,30 @@ contract SingleTokenStaking is Ownable {
 
     Counters.Counter private sessionId;
 
-
     /// @notice game event struct. as event is a solidity keyword, we call them session instead.
     struct Session {
-    		address rewardToken;		  // token to be received by user, as a reward for staking
-    		address stakingToken;  		// token to be staked by user, in order to receive rewardToken
+		address rewardToken;		// token to be received by user, as a reward for staking
+		address stakingToken;  		// token to be staked by user, in order to receive rewardToken
         uint256 totalReward;   		// amount of reward tokens to airdrop
         uint256 startTime;     		// session start timestamp
-    		uint256 period;        		// session duration in seconds
-    		uint256 claimed;       		// amount of rewardToken already claimed by users
-    		uint256 amount;        		// total amount of staked tokens by users
-    		uint256 rewardUnit;    		// reward per second = totalReward/period (aka TPS - Tokens Per Second)
-    		uint256 interestPerToken; 	// total earned interest per token since the session start
-    		uint256 claimedPerToken;    // total amount of tokens earned by a staked token ince the session start
-    		uint256 lastInterestUpdate; // timestamp of last claimedPerToken or interestPerToken update
+		uint256 period;        		// session duration in seconds
+		uint256 claimed;       		// amount of rewardToken already claimed by users
+		uint256 amount;        		// total amount of staked tokens by users
+		uint256 rewardUnit;    		// reward per second = totalReward/period (aka TPS - Tokens Per Second)
+		uint256 interestPerToken; 	// total earned interest per token since the session start
+		uint256 claimedPerToken;    // total amount of tokens earned by a staked token ince the session start
+		uint256 lastInterestUpdate; // timestamp of last claimedPerToken or interestPerToken update
 	  }
 
     /// @notice balance of lp token that each player deposited to game session
     struct Balance {
-    		uint256 amount;        		// current amount of staked token
-    		uint256 claimed;       		// current amount of claimed reward token
-    		uint256 claimedTime;      // time of last claim
+		uint256 amount;        		// current amount of staked token
+		uint256 claimed;       		// current amount of claimed reward token
+		uint256 claimedTime;        // time of last claim
 
-    		uint256 claimedReward;
-    		uint256 unpaidReward;       // Amount of reward token that contract should pay to user
-	  }
+		uint256 claimedReward;
+		uint256 unpaidReward;       // Amount of reward token that contract should pay to user
+    }
 
     /// @dev stakingToken => sessionId
     mapping(address => uint256) public lastSessionIds;
@@ -89,14 +88,8 @@ contract SingleTokenStaking is Ownable {
     );
 
     /// @dev CWS is not changable after contract deployment.
-    constructor(IERC20 _cws, address _nftFactory) public {
-        sessionId.increment(); 	// starts at value 1
-
-        /* require(_zombieFarm != address(0), "invalid _zombieFarm address");
-        require(_pool != address(0), "invalid _pool address");
-
-        zombieFarm = _zombieFarm;
-        pool = _pool; */
+    constructor() public {
+        sessionId.increment();
     }
 
     //--------------------------------------------------
@@ -117,28 +110,28 @@ contract SingleTokenStaking is Ownable {
         onlyOwner
     {
         require(_rewardToken != address(0), "invalid reward token address");
-    		require(_stakingToken != address(0), "invalid staking token address");
+    	require(_stakingToken != address(0), "invalid staking token address");
         require(_totalReward > 0, "total reward should be above 0");
         require(_period > 0, "period should be above 0");
-    		require(_startTime > block.timestamp, "seassion should start in the future");
+    	require(_startTime > block.timestamp, "seassion should start in the future");
         // @dev reward tokens must be deposited to contract before starting session
         require(IERC20(_rewardToken).balanceOf(address(this)) >= _totalReward,
             "insufficient reward token contract balance");
-    		// if game session for the staked token was already created, it must be finished
-    		uint256 _lastId = lastSessionIds[_stakingToken];
-    		if (_lastId > 0) {
-    			require(!isActive(_lastId), "last session is still active");
-    		}
+		// if game session for the staked token was already created, it must be finished
+		uint256 _lastId = lastSessionIds[_stakingToken];
+		if (_lastId > 0) {
+			require(!isActive(_lastId), "last session is still active");
+		}
 
-    		// update data
-    		uint256 _sessionId = sessionId.current();
-    		uint256 _rewardUnit = _totalReward.div(_period);
-    		sessions[_sessionId] = Session(_rewardToken, _stakingToken, _totalReward, _startTime,
-            _period, 0, 0, _rewardUnit, 0, 0, 0);
-    		sessionId.increment();
-    		lastSessionIds[_stakingToken] = _sessionId;
+		// update data
+		uint256 _sessionId = sessionId.current();
+		uint256 _rewardUnit = _totalReward.div(_period);
+		sessions[_sessionId] = Session(_rewardToken, _stakingToken, _totalReward, _startTime,
+        _period, 0, 0, _rewardUnit, 0, 0, 0);
+		sessionId.increment();
+		lastSessionIds[_stakingToken] = _sessionId;
 
-    		emit SessionStarted(
+		emit SessionStarted(
             _rewardToken,
             _stakingToken,
             _sessionId,

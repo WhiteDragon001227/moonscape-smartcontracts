@@ -15,8 +15,8 @@ contract LegendaryCityNftSale is IERC721Receiver, Ownable {
 
     bool public tradeEnabled = true;   // enable/disable buy function
     uint256 public sessionId;          // current sessionId
-    address public priceReceiver;      // this address receives the money from bought tokens
-    address public verifier;           // address to verify digital signature against
+    address private priceReceiver;      // this address receives the money from bought tokens
+    address private verifier;           // address to verify digital signature against
 
     struct Session{
         address currencyAddress;            // currency address

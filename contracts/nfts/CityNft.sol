@@ -3,97 +3,66 @@
 pragma solidity 0.6.7;
 
 import "./../openzeppelin/contracts/access/Ownable.sol";
-import "./../openzeppelin/contracts/utils/Counters.sol";
 import "./../openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./../openzeppelin/contracts/token/ERC721/ERC721Burnable.sol";
 
 /// @author Medet Ahmetson
 contract CityNft is ERC721, ERC721Burnable, Ownable {
-    using Counters for Counters.Counter;
+    mapping(uint => uint8) public categoryOf;
+    mapping(uint => bool) public minted;
+    mapping(address => bool) public minters;
 
-    Counters.Counter private tokenId;
-
-    struct Params {
-    	uint8 category;
-    	uint8 building1;
-        uint8 building2;
-        uint8 building3;
-        uint8 building4;
-        uint8 building5;
-    }
-
-    address private factory;
-
-    mapping(uint256 => Params) public paramsOf;
-
-    event Minted(
-        address indexed owner,
-        uint256 indexed id,
-        uint8 category,
-        uint8 building1,
-        uint8 building2,
-        uint8 building3,
-        uint8 building4,
-        uint8 building5
-    );
+    event SetMinter(address indexed minter);
+    event UnsetMinter(address indexed minter);
+    event Minted(address indexed owner, uint indexed id, uint8 category, uint time);
 
     constructor() public ERC721("MoonCity", "CITY") {
-      	tokenId.increment();
+        minters[msg.sender] = true;
+
+        emit SetMinter(msg.sender);
     }
 
-    modifier onlyFactory() {
-      	require(factory == _msgSender(), "only factory can call the method");
-	      _;
-    }
+    function mint(uint _tokenId, uint8 _category, address _to) external returns(bool) {
+        if (!minters[msg.sender] || minted[_tokenId] || _to == address(0) || _category > 8) {
+            return false;
+        }
 
-    function mint(
-        address _to,
-        uint8 category,
-        uint8 building1,
-        uint8 building2,
-        uint8 building3,
-        uint8 building4,
-        uint8 building5
-    )
-        public
-        onlyFactory
-        returns(uint256)
-    {
-        require(_to != address(0), "invalid receiver address");
-
-        uint256 _tokenId = tokenId.current();
-      	paramsOf[_tokenId] = Params(
-            category,
-            building1,
-            building2,
-            building3,
-            building4,
-            building5
-        );
-      	tokenId.increment();
+      	categoryOf[_tokenId] = category;
 
         _safeMint(_to, _tokenId);
 
-      	emit Minted(
-            _to,
-            _tokenId,
-            category,
-            building1,
-            building2,
-            building3,
-            building4,
-            building5
-        );
-      	return _tokenId;
+      	emit Minted(_to, _tokenId, _category, block.timestamp);
+      	return true;
     }
 
-    function setOwner(address _owner) public onlyOwner {
-	     transferOwnership(_owner);
+    function burn(uint _tokenId) external returns(bool) {
+        if (mintesr[msg.sender] != true || minted[_tokenId] == false) {
+            return false;
+        }
+
+        delete categoryOf[_tokenId];
+
+        _burn(_tokenId);
+
+        emit Burnt(_tokenId);
+
+        return true;
     }
 
-    function setFactory(address _factory) public onlyOwner {
-        require(_factory != address(0), "invalid factory address");
-        factory = _factory;
+    function setMinter(address _minter) public onlyOwner {
+        require(_minter != address(0), "invalid factory address");
+        require(!minters[_minter], "already a minter");
+        minters[_minter] = true;
+
+        emit SetMinter(_minter);
+    }
+
+    function unsetMinter(address _minter) public onlyOwner {
+        require(!minters[_minter], "already a minter");
+
+        delete minters[_minter];
+
+        emit UnsetMinter(_minter);
     }
 
     function setBaseUri(string memory _uri) public onlyOwner {

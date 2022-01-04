@@ -6,7 +6,6 @@ import "./../openzeppelin/contracts/access/Ownable.sol";
 import "./../openzeppelin/contracts/math/SafeMath.sol";
 
 import "./../nfts/CityNft.sol";
-import "./../nfts/CityFactory.sol";
 
 contract MoonscapeGame is Ownable {
     using SafeMath for uint256;
@@ -16,7 +15,6 @@ contract MoonscapeGame is Ownable {
 
     address MSCP;
     address cityNft;
-    address cityFactory;
 
     address public verifier;
 
@@ -53,17 +51,14 @@ contract MoonscapeGame is Ownable {
 
     event ImportCity(address indexed owner, uint indexed id);
     event ExportCity(address indexed owner, uint indexed id);
-    event MintCity(address indexed owner, uint indexed id);
 
     constructor(
         address _mscpToken,
         address _cityNft,
-        address _cityFactory,
         address _verifier
     ) public {
         MSCP = _mscpToken;
         cityNft = _cityNft;
-        cityFactory = _cityFactory;
         verifier = _verifier;
     }
 
@@ -145,20 +140,18 @@ contract MoonscapeGame is Ownable {
         emit ExportCity(msg.sender, _id, block.timestamp);        
     }
 
-    function mintCity(uint _id, uint8 _v, bytes32 _r, bytes32 _s) external {
+    function mintCity(uint _id, uint8 _category, uint8 _v, bytes32 _r, bytes32 _s) external {
         {   // avoid stack too deep
         // investor, project verification
 	    bytes memory prefix     = "\x19Ethereum Signed Message:\n32";
-	    bytes32 message         = keccak256(abi.encodePacked(msg.sender, address(this), _id));
+	    bytes32 message         = keccak256(abi.encodePacked(msg.sender, address(this), _id, _category));
 	    bytes32 hash            = keccak256(abi.encodePacked(prefix, message));
 	    address recover         = ecrecover(hash, v, r, s);
 
-	    require(recover == verifier, "Lighthouse: SIG");
+	    require(recover == verifier, "sig");
         }
 
-        CityFactory factory = CityFactory(cityFactory);
-        factory.mint(_id);
-
-        emit MintCity(msg.sender, _id, block.timestamp);
+        CityNft nft = CityNft(cityNft);
+        require(nft.mint(_id, _category, msg.sender), "Failed to mint city");
     }
 }

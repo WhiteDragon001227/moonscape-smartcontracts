@@ -31,26 +31,9 @@ contract MoonscapeGame is Ownable {
     mapping(uint => address) public cityOwners;
     mapping(uint => address) public roverOwners;
 
-    event Spent(
-        address indexed spender,
-        uint256 amount,
-        uint256 spentTime,
-        uint256 totalSpent
-    );
-
-    event Stake(
-        address indexed staker,
-        uint256 amount,
-        uint256 stakeTime,
-        uint256 stakeAmount
-    );
-
-    event Unstake(
-        address indexed staker,
-        uint256 amount,
-        uint256 unstakeTime,
-        uint256 stakeAmount
-    );
+    event Spent(address indexed spender, uint256 amount, uint256 spentTime, uint256 totalSpent);
+    event Stake(address indexed staker, uint256 amount, uint256 stakeTime, uint256 stakeAmount);
+    event Unstake(address indexed staker, uint256 amount, uint256 unstakeTime, uint256 stakeAmount);
 
     event ImportCity(address indexed owner, uint indexed id);
     event ExportCity(address indexed owner, uint indexed id);

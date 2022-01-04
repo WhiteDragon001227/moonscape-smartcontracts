@@ -16,10 +16,10 @@ contract CityNft is ERC721, ERC721Burnable, Ownable {
     struct Params {
     	uint8 category;
     	uint8 building1;
-      uint8 building2;
-      uint8 building3;
-      uint8 building4;
-      uint8 building5;
+        uint8 building2;
+        uint8 building3;
+        uint8 building4;
+        uint8 building5;
     }
 
     address private factory;

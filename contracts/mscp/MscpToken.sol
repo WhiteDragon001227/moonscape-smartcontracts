@@ -27,7 +27,7 @@ contract MscpToken is Context, IERC20, Ownable {
     uint256 private constant SCALER = 10 ** 18;
 
     /// @notice Maximum possible supply of this token.
-    uint256 public limitSupply = 1111111111; /// 1.1 billion
+    uint256 public limitSupply = 1111111111000000000000000000; /// 1.1 billion
 
     /// @notice Set to false to stop mint/burn of token. Set to true to allow minting.
     bool public bridgeAllowed = false;

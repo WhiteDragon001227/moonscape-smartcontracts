@@ -15,6 +15,7 @@ contract MoonscapeGame is Ownable {
 
     address MSCP;
     address cityNft;
+    address roverNft;
     address scapeNft;
 
     address public verifier;
@@ -28,6 +29,7 @@ contract MoonscapeGame is Ownable {
     mapping(address => Balance) public balances;
 
     mapping(uint => address) public cityOwners;
+    mapping(uint => address) public roverOwners;
 
     event Spent(
         address indexed spender,
@@ -54,14 +56,19 @@ contract MoonscapeGame is Ownable {
     event ExportCity(address indexed owner, uint indexed id);
     event BurnScape(uint indexed scapeId, uint indexed cityId, uint indexed buildingId);
 
+    event ImportRover(address indexed owner, uint indexed id);
+    event ExportRover(address indexed owner, uint indexed id);
+
     constructor(
         address _mscpToken,
         address _cityNft,
+        address _roverNft,
         address _scapeNft,
         address _verifier
     ) public {
         MSCP = _mscpToken;
         cityNft = _cityNft;
+        roverNft = _roverNft;
         scapeNft = _scapeNft;
         verifier = _verifier;
     }
@@ -124,7 +131,7 @@ contract MoonscapeGame is Ownable {
     function importCity(uint _id) external {
         require(_id > 0, "0");
 
-        CityNft nft = CityNft(CityNft);
+        CityNft nft = CityNft(cityNft);
         require(nft.ownerOf(_id) == msg.sender, "Not city owner");
 
         nft.safeTransferFrom(msg.sender, address(this), _id);
@@ -136,7 +143,7 @@ contract MoonscapeGame is Ownable {
     function exportCity(uint _id) external {
         require(cityOwners[_id] == msg.sender, "Not the owner");
 
-        CityNft nft = CityNft(CityNft);
+        CityNft nft = CityNft(cityNft);
         nft.safeTransferFrom(address(this), msg.sender, _id);
 
         delete cityOwners[_id];
@@ -148,7 +155,7 @@ contract MoonscapeGame is Ownable {
         {   // avoid stack too deep
         // investor, project verification
 	    bytes memory prefix     = "\x19Ethereum Signed Message:\n32";
-	    bytes32 message         = keccak256(abi.encodePacked(msg.sender, address(this), _id, _category));
+	    bytes32 message         = keccak256(abi.encodePacked(msg.sender, address(this), cityNft, _id, _category));
 	    bytes32 hash            = keccak256(abi.encodePacked(prefix, message));
 	    address recover         = ecrecover(hash, v, r, s);
 
@@ -184,5 +191,49 @@ contract MoonscapeGame is Ownable {
         nft.owerOf(_scapeId) == city.ownerOf(_cityId), "Not the owner");
 
         emit BurnScape(_scapeId, _cityId, _buildingId, block.timestamp);
+    }
+
+    /////////////////////////////////////////////////////////////
+    //
+    // Rover
+    //
+    //////////////////////////////////////////////////////////////
+
+    function importRover(uint _id) external {
+        require(_id > 0, "0");
+
+        CityNft nft = CityNft(roverNft);
+        require(nft.ownerOf(_id) == msg.sender, "Not rover owner");
+
+        nft.safeTransferFrom(msg.sender, address(this), _id);
+        roverOwners[_id] = msg.sender;
+
+        emit ImportRover(msg.sender, _id, block.timestamp);
+    }
+
+    function exportRover(uint _id) external {
+        require(roverOwners[_id] == msg.sender, "Not the owner");
+
+        CityNft nft = CityNft(roverNft);
+        nft.safeTransferFrom(address(this), msg.sender, _id);
+
+        delete roverOwners[_id];
+
+        emit ExportRover(msg.sender, _id, block.timestamp);        
+    }
+
+    function mintRover(uint _id, uint8 _type, uint8 _v, bytes32 _r, bytes32 _s) external {
+        {   // avoid stack too deep
+        // investor, project verification
+	    bytes memory prefix     = "\x19Ethereum Signed Message:\n32";
+	    bytes32 message         = keccak256(abi.encodePacked(msg.sender, address(this), roverNft, _id, _type));
+	    bytes32 hash            = keccak256(abi.encodePacked(prefix, message));
+	    address recover         = ecrecover(hash, v, r, s);
+
+	    require(recover == verifier, "sig");
+        }
+
+        CityNft nft = CityNft(roverNft);
+        require(nft.mint(_id, _type, msg.sender), "Failed to mint rover");
     }
 }

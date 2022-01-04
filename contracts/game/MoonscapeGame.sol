@@ -15,6 +15,7 @@ contract MoonscapeGame is Ownable {
 
     address MSCP;
     address cityNft;
+    address scapeNft;
 
     address public verifier;
 
@@ -51,14 +52,17 @@ contract MoonscapeGame is Ownable {
 
     event ImportCity(address indexed owner, uint indexed id);
     event ExportCity(address indexed owner, uint indexed id);
+    event BurnScape(uint indexed scapeId, uint indexed cityId, uint indexed buildingId);
 
     constructor(
         address _mscpToken,
         address _cityNft,
+        address _scapeNft,
         address _verifier
     ) public {
         MSCP = _mscpToken;
         cityNft = _cityNft;
+        scapeNft = _scapeNft;
         verifier = _verifier;
     }
 
@@ -153,5 +157,32 @@ contract MoonscapeGame is Ownable {
 
         CityNft nft = CityNft(cityNft);
         require(nft.mint(_id, _category, msg.sender), "Failed to mint city");
+    }
+
+    /////////////////////////////////////////////////////////////////
+    //
+    // Burn Scape NFT for bonus in City
+    //
+    /////////////////////////////////////////////////////////////////
+
+    function burnScape(uint _scapeId, uint _cityId, uint _buildingId, uint8 _v, bytes32 _r, bytes32 _s) external {
+        {   // avoid stack too deep
+        // investor, project verification
+	    bytes memory prefix     = "\x19Ethereum Signed Message:\n32";
+	    bytes32 message         = keccak256(abi.encodePacked(_scapeId, _cityId, _buildingId));
+	    bytes32 hash            = keccak256(abi.encodePacked(prefix, message));
+	    address recover         = ecrecover(hash, v, r, s);
+
+	    require(recover == verifier, "sig");
+        }
+
+        CityNft nft = CityNft(scapeNft);
+        nft.burn(_scapeId);
+
+        CityNft city = CityNft(scapeNft);
+        require(nft.ownerOf(_scapeId) == cityOwners[_cityId] ||
+        nft.owerOf(_scapeId) == city.ownerOf(_cityId), "Not the owner");
+
+        emit BurnScape(_scapeId, _cityId, _buildingId, block.timestamp);
     }
 }

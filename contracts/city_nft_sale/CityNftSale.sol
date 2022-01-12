@@ -114,8 +114,6 @@ contract CityNftSale is IERC721Receiver, Ownable {
         external
         onlyOwner
     {
-        if (sessionId > 0)
-            require(isFinished(sessionId), "last session hasnt finished yet");
         require(_currencyAddress != address(0), "invalid currency address");
         require(_nftAddress != address(0), "invalid nft address");
         require(_startPrice > 0, "start price can't be 0");
@@ -155,7 +153,6 @@ contract CityNftSale is IERC721Receiver, Ownable {
         onlyOwner
     {
         require(_receiverAddress != address(0), "invalid receiver address");
-        require(isFinished(_sessionId), "sesson needs to be finished");
         IERC721(sessions[_sessionId].nftAddress).setApprovalForAll(_receiverAddress, true);
 
         emit ApproveUnsoldNfts(_sessionId, sessions[_sessionId].nftAddress, _receiverAddress);
@@ -288,16 +285,6 @@ contract CityNftSale is IERC721Receiver, Ownable {
             .startTime + session.intervalsAmount * session.intervalDuration){
             return true;
         }
-        return false;
-    }
-
-    /// @dev check if session is already finished
-    /// @param _sessionId id to verify
-    /// @return true if session is finished
-    function isFinished(uint256 _sessionId) internal view returns (bool){
-        Session memory session = sessions[_sessionId];
-        if(now > session.startTime + session.intervalsAmount * session.intervalDuration)
-            return true;
         return false;
     }
 

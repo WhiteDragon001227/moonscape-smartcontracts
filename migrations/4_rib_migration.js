@@ -1,4 +1,4 @@
-var Rib = artifacts.require("./RIB.sol");
+var Rib = artifacts.require("./Rib.sol");
 
 module.exports = function(deployer, _network) {
 		deployer.deploy(Rib).then(function(){

@@ -18,6 +18,9 @@ contract CityNftSale is IERC721Receiver, Ownable {
     address private priceReceiver;      // this address receives the money from bought tokens
     address private verifier;           // address to verify digital signature against
 
+    /// TODO move outside struct, to global vars (and to constructor):
+    // currencyAddress, nftAddress, lighthouseTierAddress
+    // add function setAddresses() to set the 3 values
     struct Session{
         address currencyAddress;            // currency address
         address nftAddress;                 // nft address used for sending
@@ -27,6 +30,8 @@ contract CityNftSale is IERC721Receiver, Ownable {
         uint32 startTime;			              // session start timestamp
         uint32 intervalDuration;		        // duration of single interval – in seconds
         uint32 intervalsAmount;	            // total of intervals
+        uint32 tierRequirement;             // required tier rank
+                                  // if tier is not required, lighthouseTierAddress should be 0x0
     }
 
     /// @dev session id => Session struct
@@ -181,7 +186,8 @@ contract CityNftSale is IERC721Receiver, Ownable {
         if(_session.lighthouseTierAddress != address(0)){
             LighthouseTierInterface tier = LighthouseTierInterface(_session
                 .lighthouseTierAddress);
-            require(tier.getTierLevel(msg.sender) > -1, "tier rank 0-4 is required");
+            require(tier.getTierLevel(msg.sender) >= _session.tierRequirement,
+                "insufficient tier rank");
         }
 
         /// @dev digital signature part

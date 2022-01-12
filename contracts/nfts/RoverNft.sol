@@ -16,7 +16,7 @@ contract RoverNft is ERC721, ERC721Burnable, Ownable {
     event UnsetMinter(address indexed minter);
     event Minted(address indexed owner, uint indexed id, uint8 category, uint time);
 
-    constructor() public ERC721("MoonCity", "CITY") {
+    constructor() public ERC721("MoonRover", "ROVER") {
         minters[msg.sender] = true;
 
         emit SetMinter(msg.sender);

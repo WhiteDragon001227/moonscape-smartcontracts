@@ -2,16 +2,14 @@ var MscpToken = artifacts.require("./MscpToken.sol");
 var MscpVesting = artifacts.require("./MscpVesting.sol");
 var MscpVesting5M = artifacts.require("./MscpVesting5M.sol");
 var MscpVesting30M = artifacts.require("./MscpVesting30M.sol");
+var TestContract = artifacts.require("./TestContract.sol");
 
-
-
-async function getAccount(id) {
-    let accounts = await web3.eth.getAccounts();
-    return accounts[id];
-}
 
 
 module.exports = async function(deployer, network) {
+
+    let accounts = await web3.eth.getAccounts();
+    console.log(accounts[0]);
 
     if (network == "ganache") {
       let startTime = Math.floor(Date.now()/1000) + 5;
@@ -67,6 +65,16 @@ module.exports = async function(deployer, network) {
       await deployer.deploy(MscpVesting, MscpToken.address, startTime).then(function(){
           console.log("Mscp vesting contract was deployed at address: "+MscpVesting.address);
       });
+
+    } else if (network == "moonbeam") {
+      let startTime = Math.floor(Date.now()/1000) + 100;
+      let mscpToken = "";
+      await deployer.deploy(MscpToken).then(function(){
+          console.log("Mscp token contract was deployed at address: "+MscpToken.address);
+      });
+      // await deployer.deploy(MscpVesting, MscpToken.address, startTime).then(function(){
+      //     console.log("Mscp vesting contract was deployed at address: "+MscpVesting.address);
+      // });
 
     } else if (network == "bsc") {
       let startTime = Math.floor(Date.now()/1000) + 100;

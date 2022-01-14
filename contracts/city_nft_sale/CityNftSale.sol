@@ -30,8 +30,8 @@ contract CityNftSale is IERC721Receiver, Ownable {
         uint32 startTime;			              // session start timestamp
         uint32 intervalDuration;		        // duration of single interval – in seconds
         uint32 intervalsAmount;	            // total of intervals
-        uint32 tierRequirement;             // required tier rank
-                                  // if tier is not required, lighthouseTierAddress should be 0x0
+        int8 tierRequirement;             // required tier rank
+                                  // if tier is not required, tierRequirement should be -1
     }
 
     /// @dev session id => Session struct
@@ -106,6 +106,7 @@ contract CityNftSale is IERC721Receiver, Ownable {
     /// @param _startTime timestamp at which session becomes active
     /// @param _intervalDuration duration of each interval
     /// @param _intervalsAmount how many intervals are in a session
+    /// @param _tierRequirement required tier rank
     function startSession(
         address _currencyAddress,
         address _nftAddress,
@@ -114,7 +115,8 @@ contract CityNftSale is IERC721Receiver, Ownable {
         uint256 _priceIncrease,
         uint32 _startTime,
         uint32 _intervalDuration,
-        uint32 _intervalsAmount
+        uint32 _intervalsAmount,
+        int8 _tierRequirement
     )
         external
         onlyOwner
@@ -126,6 +128,7 @@ contract CityNftSale is IERC721Receiver, Ownable {
         require(_startTime > now, "session should start in future");
         require(_intervalDuration > 0, "interval duration can't be 0");
         require(_intervalsAmount > 0, "intervals amount can't be 0");
+        require(_tierRequirement > -2, "invalid tier requirement");
 
         sessionId++;
         sessions[sessionId] = Session(
@@ -136,7 +139,8 @@ contract CityNftSale is IERC721Receiver, Ownable {
             _priceIncrease,
             _startTime,
             _intervalDuration,
-            _intervalsAmount
+            _intervalsAmount,
+            _tierRequirement
         );
 
         emit StartSession(
@@ -183,7 +187,7 @@ contract CityNftSale is IERC721Receiver, Ownable {
 
         /// @dev make sure msg.sender has obtained tier in LighthouseTier.sol
         /// LighthouseTier.sol is external but trusted contract maintained by Seascape
-        if(_session.lighthouseTierAddress != address(0)){
+        if(_session.tierRequirement >= 0){
             LighthouseTierInterface tier = LighthouseTierInterface(_session
                 .lighthouseTierAddress);
             require(tier.getTierLevel(msg.sender) >= _session.tierRequirement,

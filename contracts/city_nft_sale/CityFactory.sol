@@ -2,7 +2,7 @@ pragma solidity 0.6.7;
 
 import "./../openzeppelin/contracts/access/AccessControl.sol";
 import "./../openzeppelin/contracts/math/SafeMath.sol";
-import "/../nfts/CityNft.sol";
+import "./../nfts/CityNft.sol";
 
 contract CityFactory is AccessControl {
     using SafeMath for uint256;
@@ -23,14 +23,15 @@ contract CityFactory is AccessControl {
     //--------------------------------------------------
 
     function mint(
-        address _owner,
-        uint8 _category
+        uint256 _tokenId,
+        uint8 _category,
+        address _owner
     )
         public
         onlyStaticUser
-        returns(uint256)
+        returns(bool)
     {
-        return nft.mint(_owner, _category);
+        return nft.mint(_tokenId, _category, _owner);
     }
 
     //--------------------------------------------------

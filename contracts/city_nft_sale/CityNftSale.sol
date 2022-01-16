@@ -9,7 +9,8 @@ import "./LighthouseTierInterface.sol";
 
 
 /// @title CityNftSale is nft selling platform
-/// Users can buy nfts for in intervals, for an increasing price.
+/// Users with tier can buy single nft per sale.
+/// Nfts are replenished in intervals of limited amount and period.
 contract CityNftSale is IERC721Receiver, Ownable {
     using SafeERC20 for IERC20;
 

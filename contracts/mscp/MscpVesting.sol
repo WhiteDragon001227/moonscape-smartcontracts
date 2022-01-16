@@ -5,8 +5,9 @@ import "./../openzeppelin/contracts/access/Ownable.sol";
 import "./../openzeppelin/contracts/math/SafeMath.sol";
 
 /// @title Vesting Contract for moonscape (MSCP) token.
+/// Unlock tokens for pre-approved addresses gradualy over fixed time period,
+/// depending on investor type.
 /// @author Nejc Schneider
-/// @notice Unlock tokens for pre-approved addresses gradualy over time.
 contract MscpVesting is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;

@@ -5,11 +5,6 @@ module.exports = {
   plugins: [
     'truffle-plugin-verify'
   ],
-  api_keys: {
-  bscscan: 'YUMQGG41AF57Z29QXXE2N6CWAWYWFEYTPQ',
-  etherscan: '35TUADMZY5B2FPXBCAMUETI2QR3CE8RJYM',
-  moonscan: 'REN7I78X9MIMH9XFX6W9RFN1GPWCIKA9YM'
-},
     compilers: {
 	solc: {
 	    version: "0.6.7"
@@ -39,11 +34,12 @@ module.exports = {
     skipDryRun: true
   },
   // Moonbase Alpha TestNet
-  moonbase: {                 // alternative RPC: https://rpc.testnet.moonbeam.network
+  moonbase: {                 // alternative RPCs
     // https://moonbeam-alpha.api.onfinality.io/rpc?apikey=cb6ddff3-c8b5-491f-a4ac-9ac1a12daeb2
     // https://moonbeam-alpha.api.onfinality.io/public
+    // https://rpc.api.moonbase.moonbeam.network
     provider: () => new HDWalletProvider(process.env.MNEMONIC,
-      `https://rpc.testnet.moonbeam.network`, 0, 5),
+      `https://rpc.api.moonbase.moonbeam.network`, 0, 5),
     network_id: 1287,
     gas: 5190000
   },

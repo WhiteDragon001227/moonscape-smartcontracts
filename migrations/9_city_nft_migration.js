@@ -14,6 +14,7 @@ module.exports = async function(deployer, network) {
     if (network == "ganache") {
         var priceReceiver = accounts[0];
         var verifier = accounts[0];
+
         await deployer.deploy(CityNftSale, priceReceiver, verifier).then(function(){
             console.log("CityNftSale contract was deployed at address: "+CityNftSale.address);
         });
@@ -28,10 +29,11 @@ module.exports = async function(deployer, network) {
         var priceReceiver = accounts[0];
         console.log("receiver: " ,priceReceiver);
         var verifier = accounts[0];
-        var _CityNft = "0x14C7C9D806c7fd8c1B45d466B910c6AbF6428F07";
-        await deployer.deploy(CityNftSale, priceReceiver, verifier).then(function(){
-            console.log("CityNftSale contract was deployed at address: "+CityNftSale.address);
-        });
+        var _CityNft = "0xb807A3F0AF8dD50725DB01d0723930bB0DB9837f";
+
+        // await deployer.deploy(CityNftSale, priceReceiver, verifier).then(function(){
+        //     console.log("CityNftSale contract was deployed at address: "+CityNftSale.address);
+        // });
         // await deployer.deploy(CityNft).then(function(){
         //     console.log("CityNft contract was deployed at address: "+CityNft.address);
         // });

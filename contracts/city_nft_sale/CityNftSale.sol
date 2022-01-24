@@ -125,7 +125,6 @@ contract CityNftSale is IERC721Receiver, Ownable {
         require(_currencyAddress != address(0), "invalid currency address");
         require(_nftAddress != address(0), "invalid nft address");
         require(_startPrice > 0, "start price can't be 0");
-        require(_priceIncrease > 0, "price increase can't be 0");
         require(_startTime > now, "session should start in future");
         require(_intervalDuration > 0, "interval duration can't be 0");
         require(_intervalsAmount > 0, "intervals amount can't be 0");

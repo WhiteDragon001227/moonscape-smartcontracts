@@ -1,6 +1,6 @@
-cityNftSaleAddresslet CityNftSale = artifacts.require("CityNftSale");
+let CityNftSale = artifacts.require("CityNftSale");
 let CityNft = artifacts.require("CityNft");
-let Rib = artifacts.require("Rib");
+let MscpToken = artifacts.require("MscpToken");
 
 // global variables
 let accounts;
@@ -22,26 +22,26 @@ let init = async function(networkId) {
     let multiplier = 1000000000000000000;
     console.log(accounts);
 
-    let cityNftSale = await CityNftSale.at("0xfF6d9a52A37FccFa1dd5df767B68D39451E4b974");
-    let cityNft = await CityNft.at("0x016f2b8fDF8F7c76b97a666fA31aBF064b1541B1");
-    let rib = await Rib.at("0xE29A4BD665e4782a4c002aA30D3d25f010E8A394");
+    let cityNftSale = await CityNftSale.at("0xd2F438FdA5b95F3bdc3512aaC30526AeB2202455");
+    let cityNft = await CityNft.at("0x14C7C9D806c7fd8c1B45d466B910c6AbF6428F07");
+    let mscpToken = await MscpToken.at("0xF2C84Cb3d1e9Fac001F36c965260aA2a9c9D822D");
 
 
     let player = accounts[0];
-    let owner = accounts[0];
+    let verifier = accounts[0];
     console.log(`Using account ${player}`);
 
     //--------------------------------------------------
     // Parameters setup and function calls
     //--------------------------------------------------
 
-    let sessionId = parseInt(await cityNftSale.sessionId.call());
-    console.log(`last session id: ${sessionId}`);
+    // let sessionId = parseInt(await cityNftSale.sessionId.call());
+    // console.log(`last session id: ${sessionId}`);
     // let nftId = parseInt(await cityNft.tokenOfOwnerByIndex(cityNftSale.address, 0));
     // console.log("nftId: " ,nftId);
 
-    // let sessionId = 1;
-    let nftId = 16;
+    let sessionId = 32;
+    let nftId = 44;
     //let currentInterval = 4
     let currentInterval = parseInt(await cityNftSale.getCurrentInterval(sessionId));
     console.log("currentInterval: " ,currentInterval);
@@ -50,10 +50,10 @@ let init = async function(networkId) {
     let currentPrice = (await cityNftSale.getCurrentPrice(sessionId, currentInterval)).toString();
     console.log("currentPrice: " ,currentPrice);
     let cityNftSaleAddress = cityNftSale.address;
-    let currencyAddress = rib.address;
+    let currencyAddress = mscpToken.address;
     let nftAddress = cityNft.address;
 
-    let amountToApprove = web3.utils.toWei("1", "ether");
+    let amountToApprove = web3.utils.toWei("10000", "ether");
 
 
     // contract calls
@@ -61,8 +61,7 @@ let init = async function(networkId) {
     let sig = await generateSig(sessionId, nftId, currentInterval, chainId,
       currentPrice, cityNftSaleAddress, currencyAddress, nftAddress);
     console.log("sig generated");
-    
-    //await approveRib();
+    //await approveMscpToken();
     //await buy();
 
     //--------------------------------------------------
@@ -70,12 +69,12 @@ let init = async function(networkId) {
     //--------------------------------------------------
 
     // approve crowns and check allowance
-    async function approveRib(){
-      console.log("attemping to approve Rib...");
-      await rib.approve(cityNftSale.address, amountToApprove, {from: player});
+    async function approveMscpToken(){
+      console.log("attemping to approve MscpToken...");
+      await mscpToken.approve(cityNftSale.address, amountToApprove, {from: player});
       console.log("checking allowance");
-      let allowance = (await rib.allowance(player, cityNftSale.address)).toString();
-      console.log(`cityNftSale was approved to spend ${allowance/multiplier} Rib`);
+      let allowance = (await mscpToken.allowance(player, cityNftSale.address)).toString();
+      console.log(`cityNftSale was approved to spend ${allowance/multiplier} MscpToken`);
     }
 
     // add currency address -only needs to run once per currency
@@ -102,7 +101,7 @@ let init = async function(networkId) {
       let str = uints + cityNftSaleAddress.substr(2) + currencyAddress.substr(2) + nftAddress.substr(2);
       let message = web3.utils.keccak256(str);
       console.log("message: ",message);
-      let hash = await web3.eth.sign(message, owner);
+      let hash = await web3.eth.sign(message, verifier);
       console.log("hashed: ", hash)
 
       let r = hash.substr(0,66);

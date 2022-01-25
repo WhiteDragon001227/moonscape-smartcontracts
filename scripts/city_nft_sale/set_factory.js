@@ -19,8 +19,8 @@ let init = async function(networkId) {
     //--------------------------------------------------
 
     // contracts
-    let factory  = await Factory.at("0xCC72101FD4F7DDCd222D4774595499c24A1c18cC");
-    let nft     = await Nft.at("0x14C7C9D806c7fd8c1B45d466B910c6AbF6428F07");
+    let factory  = await Factory.at("0x66182E72c7D3B1268d304a48ddD9bd4A5D9c5C94");
+    let nft     = await Nft.at("0x94Bf67B24c98eb612054A407673E0C9e946ad466");
 
     let user = accounts[0];
     console.log(`Using ${user}`);
@@ -29,8 +29,8 @@ let init = async function(networkId) {
     // Function calls
     //--------------------------------------------------
 
-    // await setMinter();
-    // await setNft();
+    await setMinter();
+    await setNft();  //already set in constructor
     await setFactory();
 
     //--------------------------------------------------

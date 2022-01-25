@@ -19,18 +19,18 @@ let init = async function(networkId) {
     //--------------------------------------------------
 
     // contracts
-    let factory  = await Factory.at("0xCC72101FD4F7DDCd222D4774595499c24A1c18cC");
-    let nft     = await Nft.at("0x14C7C9D806c7fd8c1B45d466B910c6AbF6428F07");
+    let factory  = await Factory.at("0x66182E72c7D3B1268d304a48ddD9bd4A5D9c5C94");
+    let nft     = await Nft.at("0x94Bf67B24c98eb612054A407673E0C9e946ad466");
 
     //--------------------------------------------------
     // Parameters setup
     //--------------------------------------------------
 
     // global vars
-    let receiver = "0xd2F438FdA5b95F3bdc3512aaC30526AeB2202455";
-    let tokenId = 36;
-    let amountToMint = 10;
-    let category = 0;   //automatically assigned in mint()
+    let receiver = "0x983D3460Fc959ee933EdCd766CfefC9cF9aFc637";
+    let tokenId = 500;
+    let amountToMint = 20;
+    //let category = 0;   //automatically assigned in mint()
 
     //--------------------------------------------------
     // Function calls setup
@@ -59,18 +59,20 @@ let init = async function(networkId) {
 
       for(let i=0; i<amountToMint; i++){
 
-          // if(tokenId>=100 && tokenId<200)
-          //   category = 4;
-          // else if(tokenId>=200 && tokenId<300)
-          //   category = 3;
-          // else if(tokenId>=300 && tokenId<400)
-          //   category = 2;
-          // else if(tokenId>=400 && tokenId<500)
-          //   category = 1;
-          // else if(tokenId>=500 && tokenId<600)
-          //   category = 0;
-          // else
-          //   throw new Error("invalid tokenId (should be 100-599)!");
+          // automatically assign category REPLACE WITH SWITCH-CASE
+          let category;
+          if(tokenId>=100 && tokenId<200)
+            category = 4;
+          else if(tokenId>=200 && tokenId<300)
+            category = 3;
+          else if(tokenId>=300 && tokenId<400)
+            category = 2;
+          else if(tokenId>=400 && tokenId<500)
+            category = 1;
+          else if(tokenId>=500 && tokenId<600)
+            category = 0;
+          else
+            throw new Error("invalid tokenId (should be 100-599)!");
 
           let minted = await factory.mint(tokenId, category, receiver).catch(console.error);
           console.log(`Nft ${i+1} with Id: ${tokenId}, category ${category} was minted`);

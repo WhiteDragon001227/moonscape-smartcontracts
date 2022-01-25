@@ -21,8 +21,8 @@ let init = async function(networkId) {
     accounts = await web3.eth.getAccounts();
     console.log(accounts);
 
-    let cityNftSale = await CityNftSale.at("0xfF6d9a52A37FccFa1dd5df767B68D39451E4b974");
-    let cityNft     = await CityNft.at("0x016f2b8fDF8F7c76b97a666fA31aBF064b1541B1");
+    let cityNftSale = await CityNftSale.at("0x9326FfC875B32677132184E68BCCC6fd75c79d51");
+    let cityNft     = await CityNft.at("0xB5d814C5E4d772883bf9C7baB80C718820E15989");
 
 
     let owner = accounts[0];
@@ -34,9 +34,9 @@ let init = async function(networkId) {
 
     // let sessionId = parseInt(await cityNftSale.sessionId.call());
     // sessionId = console.log(`last session id: ${sessionId}`);
-    let receiverAddress = owner;
+    let receiverAddress = "0x983D3460Fc959ee933EdCd766CfefC9cF9aFc637";
 
-    let sessionId = 3;
+    let sessionId = 1;
 
     // contract calls
     // await approveUnsoldNfts();
@@ -48,12 +48,14 @@ let init = async function(networkId) {
 
     // approve withdrawal of unsold nfts - after session end
     async function approveUnsoldNfts(){
-      console.log("attempting to approve unsold nfts...");
-      await cityNftSale.approveUnsoldNfts(sessionId, receiverAddress, {from: owner});
-
       console.log("Checking if Nfts are approved ?")
       let approved = await cityNft.isApprovedForAll(cityNftSale.address, receiverAddress);
       console.log(approved);
+      if(!approved){
+        console.log("attempting to approve unsold nfts...");
+        await cityNftSale.approveUnsoldNfts(sessionId, receiverAddress, {from: owner});
+        console.log("unsold nfts were approved");
+      }
     }
 
     async function withdrawNfts(){
@@ -64,9 +66,8 @@ let init = async function(networkId) {
           console.log("no more nfts in the contract");
           break;
         }
-        // TODO check allowance for given nftId
 
-        console.log(`attempting to withdraw nft id ${tokenId}`);
+        console.log(`attempting to withdraw nft id ${tokenId}...`);
         await cityNft.safeTransferFrom(cityNftSale.address, receiverAddress, tokenId, {from: owner});
         console.log(`${tokenId} was transfered`);
       }

@@ -5,12 +5,10 @@ import "./../openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./../openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./../openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./../openzeppelin/contracts/access/Ownable.sol";
-import "./LighthouseTierInterface.sol";
 
 
 /// @title CityNftSale is nft selling platform
-/// Users with tier can buy single nft per sale.
-/// Nfts are replenished in intervals of limited amount and period.
+/// Users with can buy single nft per sale. Nfts are refilled in intervals
 contract CityNftSale is IERC721Receiver, Ownable {
     using SafeERC20 for IERC20;
 
@@ -19,20 +17,14 @@ contract CityNftSale is IERC721Receiver, Ownable {
     address private priceReceiver;      // this address receives the money from bought tokens
     address private verifier;           // address to verify digital signature against
 
-    /// TODO move outside struct, to global vars (and to constructor):
-    // currencyAddress, nftAddress, lighthouseTierAddress
-    // add function setAddresses() to set the 3 values
     struct Session{
         address currencyAddress;            // currency address
         address nftAddress;                 // nft address used for sending
-        address lighthouseTierAddress;      // address of LighthouseTier external contract
         uint256 startPrice;	                // nft price in the initial interval
         uint256 priceIncrease;		          // how much nftPrice increase every interval
         uint32 startTime;			              // session start timestamp
         uint32 intervalDuration;		        // duration of single interval – in seconds
         uint32 intervalsAmount;	            // total of intervals
-        int8 tierRequirement;             // required tier rank
-                                  // if tier is not required, tierRequirement should be -1
     }
 
     /// @dev session id => Session struct
@@ -101,23 +93,19 @@ contract CityNftSale is IERC721Receiver, Ownable {
     /// @dev start a new session, during which players are allowed to buy nfts
     /// @param _currencyAddress ERC20 token to be used during the session
     /// @param _nftAddress address of nft
-    /// @param _lighthouseTierAddress tier contract address, if 0x0 tier is not requirement
     /// @param _startPrice nfts price in the first interval
     /// @param _priceIncrease how much price increases each interval
     /// @param _startTime timestamp at which session becomes active
     /// @param _intervalDuration duration of each interval
     /// @param _intervalsAmount how many intervals are in a session
-    /// @param _tierRequirement required tier rank
     function startSession(
         address _currencyAddress,
         address _nftAddress,
-        address _lighthouseTierAddress,
         uint256 _startPrice,
         uint256 _priceIncrease,
         uint32 _startTime,
         uint32 _intervalDuration,
-        uint32 _intervalsAmount,
-        int8 _tierRequirement
+        uint32 _intervalsAmount
     )
         external
         onlyOwner
@@ -128,19 +116,16 @@ contract CityNftSale is IERC721Receiver, Ownable {
         require(_startTime > now, "session should start in future");
         require(_intervalDuration > 0, "interval duration can't be 0");
         require(_intervalsAmount > 0, "intervals amount can't be 0");
-        require(_tierRequirement > -2, "invalid tier requirement");
 
         sessionId++;
         sessions[sessionId] = Session(
             _currencyAddress,
             _nftAddress,
-            _lighthouseTierAddress,
             _startPrice,
             _priceIncrease,
             _startTime,
             _intervalDuration,
-            _intervalsAmount,
-            _tierRequirement
+            _intervalsAmount
         );
 
         emit StartSession(
@@ -184,15 +169,6 @@ contract CityNftSale is IERC721Receiver, Ownable {
         require(!nftMinters[_sessionId][msg.sender],
             "cant buy more nfts this session");
         require(tradeEnabled, "trade is disabled");
-
-        /// @dev make sure msg.sender has obtained tier in LighthouseTier.sol
-        /// LighthouseTier.sol is external but trusted contract maintained by Seascape
-        if(_session.tierRequirement >= 0){
-            LighthouseTierInterface tier = LighthouseTierInterface(_session
-                .lighthouseTierAddress);
-            require(tier.getTierLevel(msg.sender) >= _session.tierRequirement,
-                "insufficient tier rank");
-        }
 
         /// @dev digital signature part
         bytes32 _messageNoPrefix = keccak256(abi.encodePacked(

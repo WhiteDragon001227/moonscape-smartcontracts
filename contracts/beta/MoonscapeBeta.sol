@@ -1,5 +1,3 @@
-// Seascape NFT
-// SPDX-License-Identifier: MIT
 pragma solidity 0.6.7;
 
 import "./../openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -7,41 +5,50 @@ import "./../openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 
 /// @author Nejc Schneider
-contract MoonscapeBeta {
+/// Users lock 100k mscp during session, and can unlock it after its finished
+contract MoonscapeBeta is Ownable {
     using SafeERC20 for IERC20;
 
+    IERC20 public immutable token;
+    uint constant private requiredAmount = 100000 * 10**18;
     uint public startTime;
     uint public endTime;
 
     mapping(address => bool) public stakers;
 
-    /// NOTE may not be needed, move to constructor
-    constructor(uint _startTime, uint _endTime) public {
+    event Transfer(address sender, bool locked);
+
+    constructor(IERC20 _token, uint _startTime, uint _endTime) public {
+        require(address(_token) != address(0), "invalid currency address");
         require(_startTime > now, "session should start in future");
         require(_endTime > _startTime, "start time should precede end");
+
+        token = _token;
         startTime = _startTime;
         endTime = _endTime;
     }
 
     function Lock() external {
-        require(startTime > now, "session hasnt started yet");
-        require(endTime < now, "session is finished");
-        // require msg.sender has 100k MSCP
+        require(startTime < now, "session hasnt started yet");
+        require(endTime > now, "session is finished");
+        require(!stakers[msg.sender], "tokens already locked");
+        require(token.balanceOf(msg.sender) >= requiredAmount, "insufficient mscp user balance");
 
-        // make sure tokens are transfered
+        stakers[msg.sender] = true;
 
-        // save user address to mapping as true
+        token.safeTransferFrom(msg.sender, address(this), requiredAmount);
 
-        // emit event with msg.sender address
+        emit Transfer(msg.sender, true);
     }
 
     function Unlock() external{
         require(now > endTime);
-        // require msg.sender address has locked tokens
+        require(stakers[msg.sender], "no tokens locked");
 
-        // set user address in mapping to false
+        stakers[msg.sender] = false;
 
-        // emit event
+        token.safeTransfer(msg.sender, requiredAmount);
 
+        emit Transfer(msg.sender, false);
     }
 }

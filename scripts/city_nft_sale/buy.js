@@ -22,13 +22,12 @@ let init = async function(networkId) {
     let multiplier = 1000000000000000000;
     console.log(accounts);
 
-    let cityNftSale = await CityNftSale.at("0xd2F438FdA5b95F3bdc3512aaC30526AeB2202455");
-    let cityNft = await CityNft.at("0x14C7C9D806c7fd8c1B45d466B910c6AbF6428F07");
-    let mscpToken = await MscpToken.at("0xF2C84Cb3d1e9Fac001F36c965260aA2a9c9D822D");
+    let cityNftSale = await CityNftSale.at("0x983D3460Fc959ee933EdCd766CfefC9cF9aFc637");
+    let cityNft = await CityNft.at("0x7cDc5D0188733eDF08412EECb9AFa840772615dC");
+    let mscpToken = await MscpToken.at("0xB60590313975f0d98821B6Cab5Ea2a6d9641D7B6");
 
 
     let player = accounts[0];
-    let verifier = accounts[0];
     console.log(`Using account ${player}`);
 
     //--------------------------------------------------
@@ -40,8 +39,8 @@ let init = async function(networkId) {
     // let nftId = parseInt(await cityNft.tokenOfOwnerByIndex(cityNftSale.address, 0));
     // console.log("nftId: " ,nftId);
 
-    let sessionId = 32;
-    let nftId = 44;
+    let sessionId = 11;
+    let nftId = 100;
     //let currentInterval = 4
     let currentInterval = parseInt(await cityNftSale.getCurrentInterval(sessionId));
     console.log("currentInterval: " ,currentInterval);
@@ -92,7 +91,8 @@ let init = async function(networkId) {
     async function generateSig(sessionId, nftId, currentInterval, chainId,
       currentPrice, cityNftSaleAddress, currencyAddress, nftAddress){
 
-      console.log("args to be passed into noPrefix: ", sessionId, nftId, currentInterval, chainId, currentPrice);
+      console.log("args to be passed into message: ", sessionId, nftId, currentInterval,
+      chainId, currentPrice, cityNftSale.address, mscpToken.address, cityNft.address);
       let uints = web3.eth.abi.encodeParameters(
         ["uint256", "uint256", "uint256", "uint256", "uint256"],
         [sessionId, nftId, currentInterval, chainId, currentPrice]);
@@ -101,8 +101,9 @@ let init = async function(networkId) {
       let str = uints + cityNftSaleAddress.substr(2) + currencyAddress.substr(2) + nftAddress.substr(2);
       let message = web3.utils.keccak256(str);
       console.log("message: ",message);
-      let hash = await web3.eth.sign(message, verifier);
-      console.log("hashed: ", hash)
+      let hash = await web3.eth.sign(message, player);
+      console.log(`signed with ${player}`);
+      console.log(`signature: ${hash}`);
 
       let r = hash.substr(0,66);
       let s = "0x" + hash.substr(66,64);

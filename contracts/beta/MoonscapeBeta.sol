@@ -6,7 +6,7 @@ import "./../openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 /// @author Nejc Schneider
 /// Users lock 100k mscp during session, and can unlock it after its finished
-contract MoonscapeBeta is Ownable {
+contract MoonscapeBeta {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable token;

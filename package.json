@@ -18,6 +18,7 @@
   "dependencies": {
     "@truffle/hdwallet-provider": "^1.7.0",
     "chai": "^4.2.0",
+    "dotenv": "^16.0.0",
     "truffle-hdwallet-provider": "^1.0.17",
     "truffle-plugin-verify": "^0.5.17"
   }

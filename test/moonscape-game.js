@@ -78,28 +78,41 @@ contract("Moonscape Game", async accounts => {
     await game.unstakeForMoondust(transferAmount);
   });
 
-  it("0.5 mint city", async () => {
-    let cityId          = 1;
+  // it("0.5 mint city", async () => {
+  //   let cityId          = 1;
     
-    let currencyAddress = crowns.address;
-    let nftAddress = nft.address;
-    let startPrice = web3.utils.toWei("1", "ether");
-    let priceIncrease = web3.utils.toWei("1", "ether");
-    let startTime = Math.floor(Date.now()/1000) + 120;
-    let intervalDuration = 5;		//10 seconds
-    let intervalsAmount = 2;
-    let slotsAmount = 5;
+  //   let currencyAddress = crowns.address;
+  //   let nftAddress = nft.address;
+  //   let startPrice = web3.utils.toWei("1", "ether");
+  //   let priceIncrease = web3.utils.toWei("1", "ether");
+  //   let startTime = Math.floor(Date.now()/1000) + 120;
+  //   let intervalDuration = 5;		//10 seconds
+  //   let intervalsAmount = 2;
+  //   let slotsAmount = 5;
 
-    try{
-      await riverboat.startSession(currencyAddress, nftAddress, startPrice, priceIncrease,
-        startTime, intervalDuration, intervalsAmount, slotsAmount, {from: gameOwner});
-      assert.fail();
-    }catch(e){
-      let sessionId = await riverboat.sessionId();
-      assert.equal(parseInt(sessionId), 1, "session id is expected to be 1");
-      //assert.equal(e.reason, "last session hasnt finished yet", "startSession function should return an error");
-    }
-  });
+  //   try{
+  //     await riverboat.startSession(currencyAddress, nftAddress, startPrice, priceIncrease,
+  //       startTime, intervalDuration, intervalsAmount, slotsAmount, {from: gameOwner});
+  //     assert.fail();
+  //   }catch(e){
+  //     let sessionId = await riverboat.sessionId();
+  //     assert.equal(parseInt(sessionId), 1, "session id is expected to be 1");
+  //     //assert.equal(e.reason, "last session hasnt finished yet", "startSession function should return an error");
+  //   }
+  // });
+
+  it("0.6 burn scape for connection (profile)", async () => {
+    let cityId = 1;
+
+    let transferValue = "20";
+    let transferAmount = web3.utils.toWei(transferValue, "ether");
+
+    console.log(`Approve purchase...`);
+    await mscp.approve(game.address, transferAmount, {from: gameOwner});
+    console.log(`MSCP was approved to be spend!`);
+
+    await game.unstakeForMoondust(transferAmount);
+  })
 
   it("3. should not be able to buy slot 1 before session is active", async () => {
     let sessionId = await riverboat.sessionId();

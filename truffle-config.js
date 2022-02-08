@@ -1,6 +1,15 @@
-let HDWalletProvider = require('@truffle/hdwallet-provider');
+var HDWalletProvider = require('@truffle/hdwallet-provider');
+require('dotenv').config();
 
 module.exports = {
+    plugins: [
+        'truffle-plugin-verify'
+    ],
+    compilers: {
+		solc: {
+	    	version: "0.6.7"
+		}
+    },
     networks: {
       development: {
         host: "local-node",
@@ -36,10 +45,6 @@ module.exports = {
       //     })
       //   }
       // }
-    },
-    compilers: {
-      solc: {
-        version: "0.6.7"
-      }
     }
+  };
   };

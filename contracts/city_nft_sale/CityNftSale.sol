@@ -5,11 +5,10 @@ import "./../openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./../openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./../openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./../openzeppelin/contracts/access/Ownable.sol";
-import "./LighthouseTierInterface.sol";
 
 
 /// @title CityNftSale is nft selling platform
-/// Users can buy nfts for in intervals, for an increasing price.
+/// Users with can buy single nft per sale. Nfts are refilled in intervals
 contract CityNftSale is IERC721Receiver, Ownable {
     using SafeERC20 for IERC20;
 
@@ -21,7 +20,6 @@ contract CityNftSale is IERC721Receiver, Ownable {
     struct Session{
         address currencyAddress;            // currency address
         address nftAddress;                 // nft address used for sending
-        address lighthouseTierAddress;      // address of LighthouseTier external contract
         uint256 startPrice;	                // nft price in the initial interval
         uint256 priceIncrease;		          // how much nftPrice increase every interval
         uint32 startTime;			              // session start timestamp
@@ -95,7 +93,6 @@ contract CityNftSale is IERC721Receiver, Ownable {
     /// @dev start a new session, during which players are allowed to buy nfts
     /// @param _currencyAddress ERC20 token to be used during the session
     /// @param _nftAddress address of nft
-    /// @param _lighthouseTierAddress tier contract address, if 0x0 tier is not requirement
     /// @param _startPrice nfts price in the first interval
     /// @param _priceIncrease how much price increases each interval
     /// @param _startTime timestamp at which session becomes active
@@ -104,7 +101,6 @@ contract CityNftSale is IERC721Receiver, Ownable {
     function startSession(
         address _currencyAddress,
         address _nftAddress,
-        address _lighthouseTierAddress,
         uint256 _startPrice,
         uint256 _priceIncrease,
         uint32 _startTime,
@@ -117,7 +113,6 @@ contract CityNftSale is IERC721Receiver, Ownable {
         require(_currencyAddress != address(0), "invalid currency address");
         require(_nftAddress != address(0), "invalid nft address");
         require(_startPrice > 0, "start price can't be 0");
-        require(_priceIncrease > 0, "price increase can't be 0");
         require(_startTime > now, "session should start in future");
         require(_intervalDuration > 0, "interval duration can't be 0");
         require(_intervalsAmount > 0, "intervals amount can't be 0");
@@ -126,7 +121,6 @@ contract CityNftSale is IERC721Receiver, Ownable {
         sessions[sessionId] = Session(
             _currencyAddress,
             _nftAddress,
-            _lighthouseTierAddress,
             _startPrice,
             _priceIncrease,
             _startTime,
@@ -175,14 +169,6 @@ contract CityNftSale is IERC721Receiver, Ownable {
         require(!nftMinters[_sessionId][msg.sender],
             "cant buy more nfts this session");
         require(tradeEnabled, "trade is disabled");
-
-        /// @dev make sure msg.sender has obtained tier in LighthouseTier.sol
-        /// LighthouseTier.sol is external but trusted contract maintained by Seascape
-        if(_session.lighthouseTierAddress != address(0)){
-            LighthouseTierInterface tier = LighthouseTierInterface(_session
-                .lighthouseTierAddress);
-            require(tier.getTierLevel(msg.sender) > -1, "tier rank 0-4 is required");
-        }
 
         /// @dev digital signature part
         bytes32 _messageNoPrefix = keccak256(abi.encodePacked(

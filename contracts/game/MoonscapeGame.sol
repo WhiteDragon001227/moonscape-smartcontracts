@@ -4,10 +4,11 @@ import "./../openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./../openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./../openzeppelin/contracts/access/Ownable.sol";
 import "./../openzeppelin/contracts/math/SafeMath.sol";
+import "./../openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 import "./../nfts/CityNft.sol";
 
-contract MoonscapeGame is Ownable {
+contract MoonscapeGame is Ownable, IERC721Receiver {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -18,7 +19,11 @@ contract MoonscapeGame is Ownable {
     address roverNft;
     address scapeNft;
 
+    address private constant dead = 0x000000000000000000000000000000000000dEaD;
+
     address public verifier;
+
+    address public feeTo;
 
     struct Balance {
 		uint256 totalSpent;      	// total amount of spend mscp
@@ -54,13 +59,15 @@ contract MoonscapeGame is Ownable {
         address _cityNft,
         address _roverNft,
         address _scapeNft,
-        address _verifier
+        address _verifier,
+        address _feeTo
     ) public {
         MSCP = _mscpToken;
         cityNft = _cityNft;
         roverNft = _roverNft;
         scapeNft = _scapeNft;
         verifier = _verifier;
+        feeTo = _feeTo;
     }
 
     //////////////////////////////////////////////////////////////////
@@ -74,7 +81,7 @@ contract MoonscapeGame is Ownable {
 
         IERC20 _token = IERC20(MSCP);
         require(_token.balanceOf(msg.sender) >= _amount, "not enough tokens to deposit");
-        require(_token.transferFrom(msg.sender, address(this), _amount), "transfer of tokens to contract failed");
+        require(_token.transferFrom(msg.sender, feeTo, _amount), "transfer of tokens to contract failed");
 
         Balance storage _balance  = balances[msg.sender];
         _balance.totalSpent = _amount.add(_balance.totalSpent);
@@ -178,13 +185,11 @@ contract MoonscapeGame is Ownable {
         }
 
         CityNft nft = CityNft(scapeNft);
-        nft.burn(_scapeId);
+        require(nft.ownerOf(_scapeId) == msg.sender, "Not the owner");
+
+        nft.safeTransferFrom(msg.sender, dead, _scapeId);
 
         buildingScapeBurns[_sessionId][msg.sender][_buildingId] = _scapeId;
-
-        CityNft city = CityNft(scapeNft);
-        require(nft.ownerOf(_scapeId) == cityOwners[_cityId] ||
-        nft.ownerOf(_scapeId) == city.ownerOf(_cityId), "Not the owner");
 
         emit BurnScapeForBuilding(_scapeId, _sessionId, _cityId, _buildingId);
     }
@@ -204,7 +209,7 @@ contract MoonscapeGame is Ownable {
         }
 
         CityNft nft = CityNft(scapeNft);
-        nft.burn(_scapeId);
+        nft.safeTransferFrom(msg.sender, dead, _scapeId);
 
         connectionScapeBurns[_sessionId][msg.sender] = _scapeId;
 
@@ -255,5 +260,20 @@ contract MoonscapeGame is Ownable {
         require(nft.mint(_id, _type, msg.sender), "Failed to mint rover");
 
         emit MintRover(msg.sender, _amount, _id, _type);
+    }
+
+    /// @dev encrypt token data
+    /// @return encrypted data
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    )
+        external
+        override
+        returns (bytes4)
+    {
+        return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
     }
 }

@@ -28,7 +28,7 @@ contract MoonscapeBeta is Ownable {
         endTime = _endTime;
     }
 
-    function Lock() external {
+    function lock() external {
         require(startTime < now, "session hasnt started yet");
         require(endTime > now, "session is finished");
         require(!stakers[msg.sender], "tokens already locked");
@@ -41,7 +41,7 @@ contract MoonscapeBeta is Ownable {
         emit Transfer(msg.sender, true);
     }
 
-    function Unlock() external{
+    function unlock() external{
         require(now > endTime);
         require(stakers[msg.sender], "no tokens locked");
 

@@ -1,6 +1,6 @@
-# The Moonscape Network smartcontracts
-This page contains the source code of Moonscape smartcontracts developed by seascape.
+# Moonscape smartcontracts
+[![Moonscape Trailer]({https://moonscapegame.com/assets/img/bg/gaming-bg1.webp})]({https://moonscapegame.com/assets/img/bg/moonscape-hero-bg.mp4} "Watch moonscape trailer")
 
-For more in-depth explanation, please visit https://docs.seascape.network/
+**Moonscape** is a *play to earn* game.
 
-The contract addresses of all deployed blockchain networks could be found at https://docs.seascape.network/smartcontracts/addresses
+This page contains the smartcontracts of Moonscape.

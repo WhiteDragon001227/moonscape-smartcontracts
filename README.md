@@ -1,5 +1,5 @@
 # Moonscape smartcontracts
-[![Watch the Moonscape trailer](https://moonscapegame.com/assets/img/bg/gaming-bg1.webp)](https://moonscapegame.com/assets/img/bg/moonscape-hero-bg.mp4)
+[![Watch the Moonscape trailer](https://moonscapegame.com/assets/img/bg/gaming-bg1.webp)](https://www.youtube.com/watch?v=ncuh37dSrYg)
 
 
 **Moonscape** is a *play to earn* game.

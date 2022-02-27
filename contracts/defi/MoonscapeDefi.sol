@@ -32,8 +32,7 @@ contract MoonscapeDefi is Stake {
     event ResumeSession(uint indexed sessionId);
     event AddStaking(uint indexed sessionId, uint indexed stakeId);
 
-    constructor (address _stakeToken) public {
-    }
+    constructor () public {}
 
     // start session
     function startSession(uint _startTime, uint _endTime) external {

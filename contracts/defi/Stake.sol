@@ -33,16 +33,16 @@ contract Stake {
     }
 
     /// @dev sessionid => Stake period
-    mapping(uint => StakePeriod) public stakePeriods;
+    mapping(bytes32 => StakePeriod) public stakePeriods;
     /// @dev session id => player address = StakeUser
-    mapping(uint => mapping(address => StakeUser)) public stakeUsers;
+    mapping(bytes32 => mapping(address => StakeUser)) public stakeUsers;
 
-    modifier whenStakePeriodActive (uint key) {
+    modifier whenStakePeriodActive (bytes32 key) {
         require(isActive(key), "STAKE_TOKEN:no active period");
 	    _;
     }
 
-    modifier validStakePeriodParams(uint key, uint startTime, uint endTime, uint rewardPool) {
+    modifier validStakePeriodParams(bytes32 key, uint startTime, uint endTime, uint rewardPool) {
         require(startTime >= block.timestamp,                   "STAKE_TOKEN: invalid_start");
         require(startTime < endTime,                            "STAKE_TOKEN: invalid_time");
         require(rewardPool > 0,                                 "STAKE_TOKEN: zero_value");
@@ -50,7 +50,7 @@ contract Stake {
         _;
     }
 
-    modifier updateRewardClaimable(uint key, address stakerAddr) {
+    modifier updateRewardClaimable(bytes32 key, address stakerAddr) {
         updatePeriodClaimable(key);
         _;
         updatePeriodClaimable(key);
@@ -61,7 +61,7 @@ contract Stake {
   		updateUserClaimable(period.countedClaimable, staker);
     }
 
-    event NewStakePeriod(uint key, uint startTime, uint endTime);
+    event NewStakePeriod(bytes32 key, uint startTime, uint endTime);
     event Deposit(address indexed staker, uint indexed key, uint amount);
     event Withdraw(address indexed staker, uint indexed key, uint amount);
     event Reward(address indexed staker, uint indexed key, uint amount);
@@ -70,7 +70,7 @@ contract Stake {
 
     /// @notice a new staking period for the smartcontract.
     function newStakePeriod(
-        uint key,               // a unique identifier. could be a session id.
+        bytes32 key,               // a unique identifier. could be a session id.
         uint startTime,
         uint endTime,
         uint rewardPool         // if usdc, then decimals is 9 for reward pool.
@@ -97,7 +97,7 @@ contract Stake {
     //-------------------------------------------------------------------
 
     /// @dev The ZombieFarm calls this function when the session is active only.
-    function deposit(uint key, address stakerAddr, uint amount)
+    function deposit(bytes32 key, address stakerAddr, uint amount)
         internal
         whenStakePeriodActive(key)
         updateRewardClaimable(key, stakerAddr)
@@ -121,7 +121,7 @@ contract Stake {
 		emit Deposit(stakerAddr, key, amount);
     }
 
-    function withdraw(uint key, address stakerAddr, uint amount)
+    function withdraw(bytes32 key, address stakerAddr, uint amount)
         internal
         updateRewardClaimable(key, stakerAddr)
     {
@@ -144,7 +144,7 @@ contract Stake {
         emit Withdraw(stakerAddr, key, amount);
     }
 
-    function reward(uint key, address stakerAddr)
+    function reward(bytes32 key, address stakerAddr)
         internal
         updateRewardClaimable(key, stakerAddr)
         returns(uint)
@@ -169,7 +169,7 @@ contract Stake {
 
     /// @dev Sets reward claimable amount for this period till this time.
     /// Reward claimable per deposited value.
-    function updatePeriodClaimable(uint key)
+    function updatePeriodClaimable(bytes32 key)
         internal
         returns(bool)
     {
@@ -205,9 +205,9 @@ contract Stake {
         staker.rewardClaimed = countedClaimable * staker.deposit / SCALER;
     }
 
-    function _claim(uint key, address stakerAddr, uint interest) internal virtual returns(bool) {}
+    function _claim(bytes32 key, address stakerAddr, uint interest) internal virtual returns(bool) {}
 
-    function _reward(uint key, address stakerAddr) internal returns(uint) {
+    function _reward(bytes32 key, address stakerAddr) internal returns(uint) {
         StakePeriod storage period = stakePeriods[key];
         StakeUser storage staker = stakeUsers[key][stakerAddr];
 
@@ -234,7 +234,7 @@ contract Stake {
         return interest;
     }
 
-    function claimable(uint key, address stakerAddr)
+    function claimable(bytes32 key, address stakerAddr)
         public
         view
         returns(uint)
@@ -287,7 +287,7 @@ contract Stake {
     /**
      * @dev session.startTime <= current time <= session.endTime
      */
-    function isActive(uint key) public view returns(bool) {
+    function isActive(bytes32 key) public view returns(bool) {
         if (key == 0) return false;
 
         StakePeriod storage period = stakePeriods[key];
@@ -297,7 +297,7 @@ contract Stake {
     /**
      * @dev current time <= session.endTime
      */
-    function initiated(uint key) public view returns(bool) {
+    function initiated(bytes32 key) public view returns(bool) {
         if (key == 0) return false;
 
         StakePeriod storage period = stakePeriods[key];

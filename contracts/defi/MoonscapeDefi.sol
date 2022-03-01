@@ -26,6 +26,7 @@ contract MoonscapeDefi is Stake {
     mapping(uint => Session) public sessions;
     mapping(bytes32 => bool) public addedStakings;
     mapping(uint => TokenStaking) public tokenStakings;
+    mapping(bytes32 => uint) public keyToId;
 
     event StartSession(uint indexed sessionId, uint startTime, uint endTime);
     event PauseSession(uint indexed sessionId);
@@ -74,6 +75,19 @@ contract MoonscapeDefi is Stake {
 
         tokenStakings[++stakeId] = TokenStaking(_sessionId, stakeAddress, rewardPool, rewardToken);
 
+        bytes32 stakeKey = stakeKeyOf(sessionId, stakeId);
+
+        keyToId[stakeKey] = stakeId;
+
+        Session storage session = sessions[_sessionId];
+
+        newStakePeriod(
+            stakeKey,
+            session.startTime,
+            session.endTime,
+            rewardPool    
+        );
+
         emit AddStaking(_sessionId, stakeId);
     }
 
@@ -84,7 +98,9 @@ contract MoonscapeDefi is Stake {
         // todo
         // validate the session id
 
-        deposit(_stakeId, msg.sender, _amount);
+        bytes32 stakeKey = stakeKeyOf(tokenStaking.sessionId, _stakeId);
+
+        deposit(stakeKey, msg.sender, _amount);
 
         IERC20 token = IERC20(tokenStaking.stakeToken);
 
@@ -101,7 +117,9 @@ contract MoonscapeDefi is Stake {
         // todo
         // validate the session id
 
-        withdraw(_stakeId, msg.sender, _amount);
+        bytes32 stakeKey = stakeKeyOf(tokenStaking.sessionId, _stakeId);
+
+        withdraw(stakeKey, msg.sender, _amount);
 
         IERC20 token = IERC20(tokenStaking.stakeToken);
 
@@ -116,13 +134,18 @@ contract MoonscapeDefi is Stake {
         external
         returns(uint256)
     {
-        return reward(_stakeId, msg.sender);
+        TokenStaking storage tokenStaking = tokenStakings[_stakeId];
+
+        bytes32 stakeKey = stakeKeyOf(tokenStaking.sessionId, _stakeId);
+
+        return reward(stakeKey, msg.sender);
     }
 
-    function _claim(uint key, address stakerAddr, uint interest) internal override returns(bool) {
-        address rewardToken =  tokenStakings[key].rewardToken;
-        
-        IERC20(rewardToken).safeTransfer(stakerAddr, interest);
+    function _claim(bytes32 key, address stakerAddr, uint interest) internal override returns(bool) {
+        uint _stakeId = keyToId[stakeKey];
+        TokenStaking storage tokenStaking = tokenStakings[_stakeId];
+
+        IERC20(tokenStaking.rewardToken).safeTransfer(stakerAddr, interest);
 
         return true;
     }  
@@ -135,13 +158,17 @@ contract MoonscapeDefi is Stake {
     //
     //////////////////////////////////////////////////////////////////////////
 
+    function stakeKeyOf(uint _sessionId, uint _stakeId) public virtual returns(bytes32) {
+        return keccak256(abi.encodePacked(_sessionId, _stakeId));
+    }
+
     /**
      * Moonscape Game can have one season live ot once.
      */
     function validSessionTime(uint _startTime, uint _endTime) public view returns(bool) {
         Session storage session = sessions[sessionId];
 
-        if (_startTime > session.endTime && _startTime >= block.timestamp && _startTime < _endTime) {
+        if (session.active && _startTime > session.endTime && _startTime >= block.timestamp && _startTime < _endTime) {
             return true;
         }
 

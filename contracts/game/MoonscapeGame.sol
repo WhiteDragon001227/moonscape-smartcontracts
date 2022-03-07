@@ -47,7 +47,7 @@ contract MoonscapeGame is Ownable, IERC721Receiver {
     event ImportCity(address indexed owner, uint indexed id, uint time);
     event ExportCity(address indexed owner, uint indexed id, uint time);
     event MintCity(address indexed owner, uint amount, uint indexed id, uint8 _category);
-    event BurnScapeForBuilding(uint indexed scapeId, uint sessionId, uint indexed cityId, uint indexed buildingId);
+    event BurnScapeForBuilding(address indexed owner, uint indexed scapeId, uint sessionId, uint cityId, uint indexed buildingId);
     event BurnScapeForConnection(address indexed owner, uint indexed scapeId, uint sessionId);
 
     event ImportRover(address indexed owner, uint indexed id, uint time);
@@ -191,7 +191,7 @@ contract MoonscapeGame is Ownable, IERC721Receiver {
 
         buildingScapeBurns[_sessionId][msg.sender][_buildingId] = _scapeId;
 
-        emit BurnScapeForBuilding(_scapeId, _sessionId, _cityId, _buildingId);
+        emit BurnScapeForBuilding(msg.sender, _scapeId, _sessionId, _cityId, _buildingId);
     }
 
     function burnScapeForConnection(uint _scapeId, uint _sessionId, uint8 _v, bytes32 _r, bytes32 _s) external {

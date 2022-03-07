@@ -10,7 +10,7 @@ contract MoonscapeBeta {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable token;
-    uint constant private requiredAmount = 100000 * 10**18;
+    uint constant private requiredAmount = 300000 * 10**18;
     uint public startTime;
     uint public endTime;
 

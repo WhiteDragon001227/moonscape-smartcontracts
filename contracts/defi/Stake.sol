@@ -30,6 +30,8 @@ contract Stake {
         uint deposit;        		// amount of deposited
         uint rewardClaimedTime;
         uint rewardClaimed;
+        bool receiveBonus;          //是否领取bonus奖励 
+        uint claimedAmound;         //领取过的收益
     }
 
     /// @dev sessionid => Stake period
@@ -43,7 +45,7 @@ contract Stake {
     }
 
     modifier validStakePeriodParams(bytes32 key, uint startTime, uint endTime, uint rewardPool) {
-        require(startTime >= block.timestamp,                   "STAKE_TOKEN: invalid_start");
+        require(startTime < block.timestamp,                   "STAKE_TOKEN: invalid_start");
         require(startTime < endTime,                            "STAKE_TOKEN: invalid_time");
         require(rewardPool > 0,                                 "STAKE_TOKEN: zero_value");
         require(stakePeriods[key].startTime == 0,   "STAKE_TOKEN: period_exists");
@@ -62,9 +64,9 @@ contract Stake {
     }
 
     event NewStakePeriod(bytes32 key, uint startTime, uint endTime);
-    event Deposit(address indexed staker, uint indexed key, uint amount);
-    event Withdraw(address indexed staker, uint indexed key, uint amount);
-    event Reward(address indexed staker, uint indexed key, uint amount);
+    event Deposit(address indexed staker, bytes32 indexed key, uint amount);
+    event Withdraw(address indexed staker, bytes32 indexed key, uint amount);
+    event Reward(address indexed staker, bytes32 indexed key, uint amount);
 
     constructor () public {}
 
@@ -222,6 +224,7 @@ contract Stake {
 
         // we avoid sub. underflow, for calulating session.rewardedUnit
         staker.rewardClaimedTime = getPeriodTime(period.startTime, period.endTime);
+        staker.claimedAmound    += interest;
 
         _claim(key, stakerAddr, interest);
 

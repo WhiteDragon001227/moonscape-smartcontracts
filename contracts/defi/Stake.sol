@@ -30,13 +30,11 @@ contract Stake {
         uint deposit;        		// amount of deposited
         uint rewardClaimedTime;
         uint rewardClaimed;
-        bool receiveBonus;          //是否领取bonus奖励 
-        uint claimedAmound;         //领取过的收益
     }
 
-    /// @dev sessionid => Stake period
+    /// @dev takeKeyOf(uint _sessionId, uint _stakeId) => Stake period
     mapping(bytes32 => StakePeriod) public stakePeriods;
-    /// @dev session id => player address = StakeUser
+    /// @dev takeKeyOf(uint _sessionId, uint _stakeId) => player address = StakeUser
     mapping(bytes32 => mapping(address => StakeUser)) public stakeUsers;
 
     modifier whenStakePeriodActive (bytes32 key) {
@@ -98,7 +96,7 @@ contract Stake {
     //
     //-------------------------------------------------------------------
 
-    /// @dev The ZombieFarm calls this function when the session is active only.
+    /// @dev The Moonscape calls this function when the session is active only.
     function deposit(bytes32 key, address stakerAddr, uint amount)
         internal
         whenStakePeriodActive(key)
@@ -224,7 +222,6 @@ contract Stake {
 
         // we avoid sub. underflow, for calulating session.rewardedUnit
         staker.rewardClaimedTime = getPeriodTime(period.startTime, period.endTime);
-        staker.claimedAmound    += interest;
 
         _claim(key, stakerAddr, interest);
 

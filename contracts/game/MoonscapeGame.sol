@@ -171,37 +171,37 @@ contract MoonscapeGame is Ownable, IERC721Receiver {
     //
     /////////////////////////////////////////////////////////////////
 
-    function burnScapeForBuilding(uint _scapeId, uint _sessionId, uint _cityId, uint _buildingId, uint8 _v, bytes32 _r, bytes32 _s) external {
+    function burnScapeForBuilding(uint _sessionId, uint _stakeId, uint _cityId, uint _buildingId, uint _scapeNftId, uint _power, uint8 _v, bytes32[2] calldata sig) external {
         require(buildingScapeBurns[_sessionId][msg.sender][_buildingId] == 0, "Already burnt");
         require(_sessionId > 0, "invalid sessionId");
         {   // avoid stack too deep
         // investor, project verification
 	    bytes memory prefix     = "\x19Ethereum Signed Message:\n32";
-	    bytes32 message         = keccak256(abi.encodePacked(_scapeId, _sessionId, _cityId, _buildingId));
+	    bytes32 message         = keccak256(abi.encodePacked(_sessionId, _stakeId, _cityId, _buildingId, _scapeNftId, _power));
 	    bytes32 hash            = keccak256(abi.encodePacked(prefix, message));
-	    address recover         = ecrecover(hash, _v, _r, _s);
+	    address recover         = ecrecover(hash, _v, sig[0], sig[1]);
 
-	    require(recover == verifier, "sig");
+	    require(recover == verifier, "Verification failed about burnScapeForBuilding");
         }
 
         CityNft nft = CityNft(scapeNft);
-        require(nft.ownerOf(_scapeId) == msg.sender, "Not the owner");
+        require(nft.ownerOf(_scapeNftId) == msg.sender, "Not the owner");
 
-        nft.safeTransferFrom(msg.sender, dead, _scapeId);
+        nft.safeTransferFrom(msg.sender, dead, _scapeNftId);
 
-        buildingScapeBurns[_sessionId][msg.sender][_buildingId] = _scapeId;
+        buildingScapeBurns[_sessionId][msg.sender][_buildingId] = _scapeNftId;
 
-        emit BurnScapeForBuilding(msg.sender, _scapeId, _sessionId, _cityId, _buildingId);
+        emit BurnScapeForBuilding(msg.sender, _scapeNftId, _sessionId, _cityId, _buildingId);
     }
 
-    function burnScapeForConnection(uint _scapeId, uint _sessionId, uint8 _v, bytes32 _r, bytes32 _s) external {
+    function burnScapeForConnection(uint _sessionId, uint _scapeNftId, uint8 _v, bytes32 _r, bytes32 _s) external {
         require(connectionScapeBurns[_sessionId][msg.sender] == 0, "Already burnt");
         require(_sessionId > 0, "invalid sessionId");
 
         {   // avoid stack too deep
         // investor, project verification
 	    bytes memory prefix     = "\x19Ethereum Signed Message:\n32";
-	    bytes32 message         = keccak256(abi.encodePacked(msg.sender, _scapeId, _sessionId));
+	    bytes32 message         = keccak256(abi.encodePacked(msg.sender, _scapeNftId, _sessionId));
 	    bytes32 hash            = keccak256(abi.encodePacked(prefix, message));
 	    address recover         = ecrecover(hash, _v, _r, _s);
 
@@ -209,11 +209,11 @@ contract MoonscapeGame is Ownable, IERC721Receiver {
         }
 
         CityNft nft = CityNft(scapeNft);
-        nft.safeTransferFrom(msg.sender, dead, _scapeId);
+        nft.safeTransferFrom(msg.sender, dead, _scapeNftId);
 
-        connectionScapeBurns[_sessionId][msg.sender] = _scapeId;
+        connectionScapeBurns[_sessionId][msg.sender] = _scapeNftId;
 
-        emit BurnScapeForConnection(msg.sender, _scapeId, _sessionId);
+        emit BurnScapeForConnection(msg.sender, _scapeNftId, _sessionId);
     }
 
     /////////////////////////////////////////////////////////////

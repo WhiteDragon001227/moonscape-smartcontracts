@@ -58,7 +58,7 @@ contract MoonscapeDefi is Stake, IERC721Receiver, Ownable {
     constructor () public {}
 
     /// @dev start a new session
-    function startSession(uint _startTime, uint _endTime) external {
+    function startSession(uint _startTime, uint _endTime) external onlyOwner{
         require(validSessionTime(_startTime, _endTime), "INVALID_SESSION_TIME");
 
         sessionId++;
@@ -69,7 +69,7 @@ contract MoonscapeDefi is Stake, IERC721Receiver, Ownable {
     }
 
     /// @dev pause session
-    function pauseSession(uint _sessionId) external {
+    function pauseSession(uint _sessionId) external onlyOwner{
         Session storage session = sessions[_sessionId];
 
         require(session.active, "INACTIVE");
@@ -80,7 +80,7 @@ contract MoonscapeDefi is Stake, IERC721Receiver, Ownable {
     }
 
     /// @dev resume session, make it active
-    function resumeSession(uint _sessionId) external {
+    function resumeSession(uint _sessionId) external onlyOwner{
         Session storage session = sessions[_sessionId];
 
         require(session.endTime > 0 && !session.active, "ACTIVE");
@@ -91,7 +91,7 @@ contract MoonscapeDefi is Stake, IERC721Receiver, Ownable {
     }
 
     /// @dev add token staking to session
-    function addTokenStaking(uint _sessionId, address stakeAddress, uint rewardPool, address rewardToken, uint _burn) external {
+    function addTokenStaking(uint _sessionId, address stakeAddress, uint rewardPool, address rewardToken, uint _burn) external onlyOwner{
         bytes32 key = keccak256(abi.encodePacked(_sessionId, stakeAddress, rewardToken));
 
         require(!addedStakings[key], "DUPLICATE_STAKING");
@@ -111,7 +111,7 @@ contract MoonscapeDefi is Stake, IERC721Receiver, Ownable {
 
         keyToId[stakeKey] = stakeId;
 
-        Session storage session = sessions[_sessionId];
+        Session memory session = sessions[_sessionId];
 
         newStakePeriod(
             stakeKey,
@@ -300,18 +300,13 @@ contract MoonscapeDefi is Stake, IERC721Receiver, Ownable {
             IERC20 _rewardToken = IERC20(_token);
 
             uint256 _balance = _rewardToken.balanceOf(address(this));
-            if (_amount > _balance) {
-                _rewardToken.transfer(_to, _balance);
-            } else {
-                _rewardToken.transfer(_to, _amount);
-            }
+            require(_amount <= _balance, "do not have enough token to reward");
+            _rewardToken.transfer(_to, _amount);
         } else {
+
             uint256 _balance = address(this).balance;
-            if (_amount > _balance) {
-                payable(_to).transfer(_balance);
-            } else {
-                payable(_to).transfer(_amount);
-            }
+            require(_amount <= _balance, "do not have enough token to reward");
+            payable(_to).transfer(_amount);
         }
     }
 
@@ -328,7 +323,7 @@ contract MoonscapeDefi is Stake, IERC721Receiver, Ownable {
 
     /// @dev Moonscape Game can have one season live ot once.
     function validSessionTime(uint _startTime, uint _endTime) public view returns(bool) {
-        Session storage session = sessions[sessionId];
+        Session memory session = sessions[sessionId];
 
         if (_startTime > session.endTime && _startTime >= block.timestamp && _startTime < _endTime) {
             return true;

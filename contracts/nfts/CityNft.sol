@@ -23,7 +23,7 @@ contract CityNft is ERC721, ERC721Burnable, Ownable {
     }
 
     function mint(uint _tokenId, uint8 _category, address _to) external returns(bool) {
-        if (!minters[msg.sender] || minted[_tokenId] || _to == address(0) || _category > 8) {
+        if (!minters[msg.sender] || _to == address(0) || _category > 8) {
             return false;
         }
 

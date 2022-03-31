@@ -52,7 +52,7 @@ contract MoonscapeGame is Ownable, IERC721Receiver {
 
     event ImportRover(address indexed owner, uint indexed id, uint time);
     event ExportRover(address indexed owner, uint indexed id, uint time);
-    event MintRover(address indexed owner, uint amount, uint indexed id, uint8 _type);
+    event MintRover(address indexed owner, uint indexed id, uint8 _type);
 
     constructor(
         address _mscpToken,

@@ -138,7 +138,7 @@ contract MoonscapeDefi is Stake, IERC721Receiver, Ownable {
 
         {
         bytes memory prefix     = "\x19Ethereum Signed Message:\n32";
-        bytes32 message         = keccak256(abi.encodePacked(_stakeId, tokenStaking.sessionId, _cityId, _buildingId));
+        bytes32 message         = keccak256(abi.encodePacked(_stakeId, tokenStaking.sessionId, _cityId, _buildingId, msg.sender));
         bytes32 hash            = keccak256(abi.encodePacked(prefix, message));
         address recover         = ecrecover(hash, v, sig[0], sig[1]);
 

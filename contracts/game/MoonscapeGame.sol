@@ -245,11 +245,11 @@ contract MoonscapeGame is Ownable, IERC721Receiver {
         emit ExportRover(msg.sender, _id, block.timestamp);        
     }
 
-    function mintRover(uint _id, uint8 _type, uint  _amount, uint8 _v, bytes32 _r, bytes32 _s) external {
+    function mintRover(uint _id, uint8 _type, uint8 _v, bytes32 _r, bytes32 _s) external {
         {   // avoid stack too deep
         // investor, project verification
 	    bytes memory prefix     = "\x19Ethereum Signed Message:\n32";
-	    bytes32 message         = keccak256(abi.encodePacked(msg.sender, address(this), roverNft, _id, _amount, _type));
+	    bytes32 message         = keccak256(abi.encodePacked(msg.sender, address(this), roverNft, _id, _type));
 	    bytes32 hash            = keccak256(abi.encodePacked(prefix, message));
 	    address recover         = ecrecover(hash, _v, _r, _s);
 
@@ -259,7 +259,7 @@ contract MoonscapeGame is Ownable, IERC721Receiver {
         CityNft nft = CityNft(roverNft);
         require(nft.mint(_id, _type, msg.sender), "Failed to mint rover");
 
-        emit MintRover(msg.sender, _amount, _id, _type);
+        emit MintRover(msg.sender, _id, _type);
     }
 
     /// @dev encrypt token data

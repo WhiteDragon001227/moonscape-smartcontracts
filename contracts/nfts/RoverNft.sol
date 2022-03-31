@@ -23,7 +23,7 @@ contract RoverNft is ERC721, ERC721Burnable, Ownable {
     }
 
     function mint(uint _tokenId, uint8 _type, address _to) external returns(bool) {
-        if (!minters[msg.sender] || minted[_tokenId] || _to == address(0) || _type > 8) {
+        if (!minters[msg.sender] || _to == address(0) || _type > 8) {
             return false;
         }
 

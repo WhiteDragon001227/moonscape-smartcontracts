@@ -295,17 +295,22 @@ contract MoonscapeDefi is Stake, IERC721Receiver, Ownable {
     }  
 
 
-    function _safeTransfer(address _token, address _to, uint256 _amount) internal {
+     function _safeTransfer(address _token, address _to, uint256 _amount) internal {
         if (_token != address(0)) {
             IERC20 _rewardToken = IERC20(_token);
 
             uint256 _balance = _rewardToken.balanceOf(address(this));
             require(_amount <= _balance, "do not have enough token to reward");
+
+            uint256 _beforBalance = _rewardToken.balanceOf(_to);
             _rewardToken.transfer(_to, _amount);
+
+            require(_rewardToken.balanceOf(_to) == _beforBalance + _amount, "Invalid transfer");
         } else {
 
             uint256 _balance = address(this).balance;
             require(_amount <= _balance, "do not have enough token to reward");
+
             payable(_to).transfer(_amount);
         }
     }

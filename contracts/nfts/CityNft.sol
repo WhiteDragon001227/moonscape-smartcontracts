@@ -9,7 +9,6 @@ import "./../openzeppelin/contracts/token/ERC721/ERC721Burnable.sol";
 /// @author Medet Ahmetson
 contract CityNft is ERC721, ERC721Burnable, Ownable {
     mapping(uint => uint8) public categoryOf;
-    mapping(uint => bool) public minted;
     mapping(address => bool) public minters;
 
     event SetMinter(address indexed minter);
